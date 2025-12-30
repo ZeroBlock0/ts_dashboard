@@ -34,6 +34,7 @@ if exist dist_nuitka rmdir /s /q dist_nuitka
 
 REM Run Nuitka Build
 "%PYTHON_EXE%" -m nuitka ^
+    --assume-yes-for-downloads ^
     --onefile ^
     --enable-plugin=pyside6 ^
     --windows-console-mode=disable ^

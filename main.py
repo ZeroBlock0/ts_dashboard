@@ -841,8 +841,14 @@ class MainWindow(FluentWindow):
         
         # Initialize Clients
         # Use config for initial connection info if available
-        ra_ip = self.config.get("remote_ip", "127.0.0.1")
-        ra_port = int(self.config.get("remote_port", 5899))
+        ra_ip = self.config.get("remote_ip") or "127.0.0.1"
+        
+        ra_port_val = self.config.get("remote_port")
+        try:
+            ra_port = int(ra_port_val) if ra_port_val else 5899
+        except ValueError:
+            ra_port = 5899
+            
         self.ts_client = TeamSpeakClient(ip=ra_ip, port=ra_port, config_file=get_config_path())
         
         self.query_client = ServerQueryClient()

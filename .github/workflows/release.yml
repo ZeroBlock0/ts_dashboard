@@ -17,9 +17,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-latest
-            script: ./build_nuitka.sh
-            asset_pattern: "dist_nuitka/*.dmg"
+#          - os: macos-latest
+#            script: ./build_nuitka.sh
+#            asset_pattern: "dist_nuitka/*.dmg"
           - os: windows-latest
             script: .\build_nuitka.bat
             asset_pattern: "dist_nuitka/TS_Dashboard.exe"

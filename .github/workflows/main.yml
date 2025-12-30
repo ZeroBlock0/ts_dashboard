@@ -3,14 +3,13 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*' # 当你推送以 v 开头的标签（如 v1.0.0）时触发
-  workflow_dispatch: # 允许手动触发
+      - 'v*' # 推送标签触发，例如 v1.0.0
+  workflow_dispatch:
 
 jobs:
   build:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    # 授予创建 Release 的权限
     permissions:
       contents: write
 
@@ -19,10 +18,10 @@ jobs:
         include:
           - os: macos-latest
             script: ./build_nuitka.sh
-            output_name: "TS-Dashboard-macOS.zip"
+            asset_name: "dist_nuitka/TS_Dashboard_macOS.dmg"
           - os: windows-latest
             script: build_nuitka.bat
-            output_name: "TS_Dashboard_Windows.exe"
+            asset_name: "dist_nuitka/TS_Dashboard.exe"
 
     steps:
       - name: Checkout code
@@ -39,28 +38,15 @@ jobs:
           python-version: '3.10'
 
       - name: Run Build Script
-        # 根据系统自动运行 .sh 或 .bat
         run: |
+          chmod +x ./build_nuitka.sh
           ${{ matrix.script }}
-        shell: bash # 在 Windows 上也能用 bash 调用 .bat
-
-      - name: Post-Build (macOS Only)
-        # macOS 需要把 .app 文件夹压缩成 zip 才能上传到 Release
-        if: matrix.os == 'macos-latest'
-        run: |
-          cd dist_nuitka
-          zip -r "../${{ matrix.output_name }}" "TS Dashboard.app"
-
-      - name: Post-Build (Windows Only)
-        # Windows 脚本已经输出了单文件，直接移动并重命名
-        if: matrix.os == 'windows-latest'
-        run: |
-          mv dist_nuitka/TS_Dashboard.exe ${{ matrix.output_name }}
+        shell: bash
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ matrix.output_name }}
+          files: ${{ matrix.asset_name }}
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
         env:

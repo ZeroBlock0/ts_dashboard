@@ -21,7 +21,12 @@ PYTHON_EXE=".venv/bin/python"
 echo "Starting Nuitka Build for macOS..."
 rm -rf build_nuitka dist_nuitka
 
-# 运行 Nuitka 打包
+# 显示系统资源信息
+echo "System Info:"
+sysctl hw.memsize hw.ncpu || true
+df -h . || true
+
+# 运行 Nuitka 打包（添加更多优化参数和输出）
 $PYTHON_EXE -m nuitka \
     --standalone \
     --macos-create-app-bundle \
@@ -37,6 +42,9 @@ $PYTHON_EXE -m nuitka \
     --file-version=1.0.0.0 \
     --product-version=1.0.0.0 \
     --remove-output \
+    --show-progress \
+    --show-memory \
+    --jobs=2 \
     main.py
 
 # --- DMG 打包部分 ---
@@ -54,13 +62,16 @@ if [ $? -eq 0 ]; then
     fi
     
     # 修复权限
+    echo "Fixing permissions..."
     chmod +x "$APP_NAME.app/Contents/MacOS/main"
     
     # 创建 DMG
+    echo "Creating DMG..."
     hdiutil create -volname "$APP_NAME" -srcfolder "$APP_NAME.app" -ov -format UDZO "$DMG_NAME"
     
     if [ $? -eq 0 ]; then
         echo "DMG Created Successfully: $DMG_NAME"
+        ls -lh "$DMG_NAME"
     else
         echo "DMG Creation Failed!"
         exit 1
@@ -70,3 +81,5 @@ else
     echo "Build Failed!"
     exit 1
 fi
+
+echo "Build process completed!"

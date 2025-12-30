@@ -10,6 +10,7 @@ jobs:
   build:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
     permissions:
       contents: write
 
@@ -41,8 +42,16 @@ jobs:
         if: runner.os == 'macOS'
         run: chmod +x ./build_nuitka.sh
 
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          # 增加可用文件描述符
+          ulimit -n 10240
+
       - name: Run Build Script
         run: ${{ matrix.script }}
+        env:
+          NUITKA_CACHE_DISABLE: "1"
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v2

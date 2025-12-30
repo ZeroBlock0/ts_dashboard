@@ -20,9 +20,21 @@ powershell -Command "(Get-Content pyproject.toml) -replace 'version = \".*\"', '
 
 git add .
 git commit -m "Release v%VERSION%"
+if %errorlevel% neq 0 (
+    echo Warning: Commit failed or nothing to commit. Continuing...
+)
+
 git push origin main
 
 git tag "v%VERSION%"
+if %errorlevel% neq 0 (
+    echo.
+    echo [ERROR] Tag v%VERSION% already exists!
+    echo Please update the version in _version.py before releasing.
+    echo The script will stop here to prevent triggering CI with old code.
+    exit /b 1
+)
+
 git push origin "v%VERSION%"
 
 echo Released v%VERSION%

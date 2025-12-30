@@ -21,7 +21,7 @@ jobs:
             asset_pattern: "dist_nuitka/*.dmg"
             shell_type: bash  # 新增：指定 Mac 使用 bash
           - os: windows-latest
-            script: build_nuitka.bat
+            script: .\build_nuitka.bat
             asset_pattern: "dist_nuitka/TS_Dashboard.exe"
             shell_type: cmd   # 新增：指定 Win 使用 cmd
 

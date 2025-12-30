@@ -37,8 +37,6 @@ echo "Starting Nuitka Build for macOS..."
 rm -rf build_nuitka dist_nuitka
 
 # 运行 Nuitka 打包
-# 注意: macOS 上通常生成 .app 应用包，而不是单文件 exe
-
 $PYTHON_EXE -m nuitka \
     --standalone \
     --macos-create-app-bundle \
@@ -56,11 +54,31 @@ $PYTHON_EXE -m nuitka \
     --remove-output \
     main.py
 
+# --- 新增 DMG 打包部分 ---
 if [ $? -eq 0 ]; then
     echo ""
-    echo "Build Success!"
-    echo "Output: dist_nuitka/TS Dashboard.app"
+    echo "Nuitka Build Success! Starting DMG creation..."
+    
+    APP_NAME="TS Dashboard"
+    DMG_NAME="TS_Dashboard_macOS.dmg"
+    
+    # 确保在 dist_nuitka 目录下操作
+    cd dist_nuitka
+    
+    # 使用 hdiutil 创建 DMG
+    # -srcfolder 指定要打包的 .app 文件夹
+    # -format UDZO 表示创建压缩格式的只读镜像
+    hdiutil create -volname "$APP_NAME" -srcfolder "$APP_NAME.app" -ov -format UDZO "$DMG_NAME"
+    
+    if [ $? -eq 0 ]; then
+        echo "DMG Created Successfully: dist_nuitka/$DMG_NAME"
+    else
+        echo "DMG Creation Failed!"
+        exit 1
+    fi
+    cd ..
 else
     echo ""
     echo "Build Failed!"
+    exit 1
 fi

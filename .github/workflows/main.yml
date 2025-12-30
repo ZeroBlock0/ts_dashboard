@@ -1,39 +1,67 @@
-name: Build macOS App with Nuitka
+name: Build and Release
 
 on:
   push:
-    branches: [ "main" ]
-  workflow_dispatch:
+    tags:
+      - 'v*' # 当你推送以 v 开头的标签（如 v1.0.0）时触发
+  workflow_dispatch: # 允许手动触发
 
 jobs:
   build:
-    runs-on: macos-latest
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    # 授予创建 Release 的权限
+    permissions:
+      contents: write
+
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            script: ./build_nuitka.sh
+            output_name: "TS-Dashboard-macOS.zip"
+          - os: windows-latest
+            script: build_nuitka.bat
+            output_name: "TS_Dashboard_Windows.exe"
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install uv
-      uses: astral-sh/setup-uv@v5
-      with:
-        enable-cache: true  # 开启缓存，让下次构建更快
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-    - name: Run Build Script
-      run: |
-        # 确保脚本有执行权限
-        chmod +x ./build_nuitka.sh
-        # 执行脚本
-        ./build_nuitka.sh
-      shell: bash
+      - name: Run Build Script
+        # 根据系统自动运行 .sh 或 .bat
+        run: |
+          ${{ matrix.script }}
+        shell: bash # 在 Windows 上也能用 bash 调用 .bat
 
-    - name: Upload App Bundle
-      uses: actions/upload-artifact@v4
-      with:
-        name: TS-Dashboard-macOS
-        # Nuitka 输出的是目录，包含 .app 文件夹
-        path: dist_nuitka/*.app
+      - name: Post-Build (macOS Only)
+        # macOS 需要把 .app 文件夹压缩成 zip 才能上传到 Release
+        if: matrix.os == 'macos-latest'
+        run: |
+          cd dist_nuitka
+          zip -r "../${{ matrix.output_name }}" "TS Dashboard.app"
+
+      - name: Post-Build (Windows Only)
+        # Windows 脚本已经输出了单文件，直接移动并重命名
+        if: matrix.os == 'windows-latest'
+        run: |
+          mv dist_nuitka/TS_Dashboard.exe ${{ matrix.output_name }}
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.output_name }}
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

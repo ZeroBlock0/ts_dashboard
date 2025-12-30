@@ -16,6 +16,8 @@ A comprehensive dashboard for TeamSpeak 5, featuring event monitoring, chat logg
   - **Manual Control**: Connect/Disconnect buttons with status indicators.
   - **API Key**: Manage your TeamSpeak Remote Apps API Key directly.
 
+> **Note**: Configuration is saved in `ts_config.json`. If the application fails to start, try deleting this file to reset settings.
+
 ## Setup
 
 1. **Enable Remote Apps in TeamSpeak**:

@@ -39,7 +39,7 @@
 
 ### 前置条件
 
-- 已安装 `uv`（参见：https://github.com/astral-sh/uv）。
+- 已安装 `uv`（参见：<https://github.com/astral-sh/uv>）。
 - Windows：安装 Visual Studio 的 C++ 构建工具。
 - macOS：安装 Xcode 命令行工具。
 

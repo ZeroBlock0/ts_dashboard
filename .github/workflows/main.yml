@@ -26,9 +26,9 @@ jobs:
     - name: Run Build Script
       run: |
         # 确保脚本有执行权限
-        chmod +x ./your_script_name.sh
+        chmod +x ./build_nuitka.sh
         # 执行脚本
-        ./your_script_name.sh
+        ./build_nuitka.sh
       shell: bash
 
     - name: Upload App Bundle

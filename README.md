@@ -1,92 +1,91 @@
-# TS Dashboard
+# TS Dashboard (TS 仪表盘)
 
-A comprehensive dashboard for TeamSpeak 5, featuring event monitoring, chat logging, and server administration tools.
+一个为 TeamSpeak 5 设计的综合桌面仪表盘，提供事件监控、聊天日志和服务器管理功能。
 
-## Features
+## 功能
 
-- **Dashboard**: Real-time monitoring of TeamSpeak events (Client Moved, Text Message, etc.).
-- **Chat Monitor**: View chat logs from the server.
-- **Server Admin**: 
-  - View Server Info, Channel List, Client List, Ban List.
-  - Execute administrative actions: Kick, Poke, Global Message.
-  - Send custom ServerQuery commands.
-- **Settings**: 
-  - Configure connection details for both Remote Apps (WebSocket) and ServerQuery (Telnet).
-  - **Auto Connect**: Toggle automatic connection on startup.
-  - **Manual Control**: Connect/Disconnect buttons with status indicators.
-  - **API Key**: Manage your TeamSpeak Remote Apps API Key directly.
+- **仪表盘 (Dashboard)**：实时监控 TeamSpeak 事件（如用户移动、文字消息等）。
+- **聊天监控 (Chat Monitor)**：查看并记录服务器聊天信息。
+- **服务器管理 (Server Admin)**：
+  - 查看服务器信息、频道列表、用户列表与封禁列表。
+  - 执行管理操作：踢出用户 (Kick)、戳一戳 (Poke)、全局广播。
+  - 发送自定义 ServerQuery 命令。
+- **设置 (Settings)**：
+  - 配置 Remote Apps（WebSocket）与 ServerQuery（Telnet）连接信息。
+  - **自动连接**：启动时是否自动连接。
+  - **手动控制**：带状态指示的连接 / 断开按钮。
+  - **API Key**：管理 TeamSpeak Remote Apps 的 API Key。
 
-> **Note**: Configuration is saved in `ts_config.json`. If the application fails to start, try deleting this file to reset settings.
+> **注意**：配置保存在 `ts_config.json`，如果遇到程序无法启动的情况，删除该文件可重置设置。
 
-## Setup
+## 安装与使用
 
-1. **Enable Remote Apps in TeamSpeak**:
-   - Go to TeamSpeak Options -> Remote Apps.
-   - Ensure the WebSocket server is running (default port 5899).
+1. **启用 TeamSpeak Remote Apps**：
+   - 打开 TeamSpeak 设置 → Remote Apps。
+   - 确保 WebSocket 服务已启用（默认端口 5899）。
 
-2. **Run the Application**:
-   - Run `TS_Dashboard.exe` (Windows) or `TS Dashboard.app` (macOS).
-   - On first run, TeamSpeak will ask you to authorize the application. Click "Allow".
+2. **运行程序**：
+   - Windows：运行 `TS_Dashboard.exe`。
+   - macOS：打开 `TS Dashboard.app`。
+   - 首次运行时，TeamSpeak 会提示授权，请点击 “Allow”。
 
-3. **ServerQuery Connection (Optional)**:
-   - To use Server Admin features, go to the **Settings** tab.
-   - Enter your ServerQuery credentials (IP, Port, Username, Password).
-   - Click "Save & Reconnect" or use the individual Connect buttons.
+3. **ServerQuery（可选）**：
+   - 前往 “设置” 页，输入 ServerQuery 的 IP、端口、用户名与密码。
+   - 点击 “保存并重连” 或使用单独的连接按钮进行连接。
 
-## Development & Building
+## 开发与构建
 
-This project uses `uv` for dependency management and `Nuitka` for compilation.
+本项目使用 `uv` 管理依赖，使用 `Nuitka` 打包为原生可执行文件。
 
-### Prerequisites
+### 前置条件
 
-- [uv](https://github.com/astral-sh/uv) installed.
-- **Windows**: Visual Studio Build Tools (C++ Desktop Development workload).
-- **macOS**: Xcode Command Line Tools.
+- 已安装 `uv`（参见：https://github.com/astral-sh/uv）。
+- Windows：安装 Visual Studio 的 C++ 构建工具。
+- macOS：安装 Xcode 命令行工具。
 
-### Build Instructions
+### 构建说明
 
-The project includes one-click build scripts that handle environment setup and compilation.
+仓库包含一键构建脚本用于环境准备与编译。
 
-**Windows:**
+**Windows：**
 ```powershell
 .\build_nuitka.bat
 ```
-The executable will be generated at `dist_nuitka\TS_Dashboard.exe`.
+可执行文件位于 `dist_nuitka\TS_Dashboard.exe`。
 
-**macOS:**
+**macOS：**
 ```bash
 chmod +x build_nuitka.sh
 ./build_nuitka.sh
 ```
-The application bundle will be generated at `dist_nuitka/TS Dashboard.app`.
+应用程序包位于 `dist_nuitka/TS Dashboard.app`。
 
-### Running from Source
+### 从源码运行
 
 ```bash
 uv sync
 uv run main.py
 ```
 
-### Release Process
+### 发布流程
 
-To release a new version:
+发布步骤：
 
-1.  Update the version number in `_version.py`.
-2.  Run the release script:
+1. 在 `_version.py` 中更新版本号。
+2. 运行发布脚本：
 
-    **Windows:**
-    ```powershell
-    .\release.bat
-    ```
+   **Windows：**
+   ```powershell
+   .\release.bat
+   ```
 
-    **macOS / Linux:**
-    ```bash
-    ./release.sh
-    ```
+   **macOS / Linux：**
+   ```bash
+   ./release.sh
+   ```
 
-This script will:
-- Sync the version to `pyproject.toml`.
-- Commit all changes.
-- Push to the `main` branch.
-- Create and push a git tag (e.g., `v1.0.0`), which triggers the CI/CD workflow.
+发布脚本会：
+- 将版本号同步到 `pyproject.toml`。
+- 提交并推送更改到 `main` 分支。
+- 创建并推送 Git 标签（例如 `v1.0.0`），触发 CI/CD 工作流。
 

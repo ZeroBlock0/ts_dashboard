@@ -47,6 +47,11 @@ if [ $? -eq 0 ]; then
     DMG_NAME="TS_Dashboard_macOS.dmg"
     
     cd dist_nuitka
+
+    # Rename the generated app to the desired product name
+    if [ -d "main.app" ]; then
+        mv "main.app" "$APP_NAME.app"
+    fi
     
     # 修复权限
     chmod +x "$APP_NAME.app/Contents/MacOS/main"

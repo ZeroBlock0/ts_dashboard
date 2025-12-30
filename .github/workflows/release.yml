@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*' # 推送标签触发，例如 v1.0.0
+      - 'v*' # 推送标签时触发
   workflow_dispatch:
 
 jobs:
@@ -18,10 +18,12 @@ jobs:
         include:
           - os: macos-latest
             script: ./build_nuitka.sh
-            asset_name: "dist_nuitka/TS_Dashboard_macOS.dmg"
+            asset_pattern: "dist_nuitka/*.dmg"
+            shell_type: bash  # 新增：指定 Mac 使用 bash
           - os: windows-latest
             script: build_nuitka.bat
-            asset_name: "dist_nuitka/TS_Dashboard.exe"
+            asset_pattern: "dist_nuitka/TS_Dashboard.exe"
+            shell_type: cmd   # 新增：指定 Win 使用 cmd
 
     steps:
       - name: Checkout code
@@ -38,16 +40,17 @@ jobs:
           python-version: '3.10'
 
       - name: Run Build Script
+        # 使用 matrix 动态切换 shell，解决 "command not found" 问题
+        shell: ${{ matrix.shell_type }}
         run: |
-          chmod +x ./build_nuitka.sh
+          # 仅在 macOS 下执行权限赋予
+          if "${{ matrix.os }}" == "macos-latest" ( chmod +x ./build_nuitka.sh )
           ${{ matrix.script }}
-        shell: bash
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ matrix.asset_name }}
+          files: ${{ matrix.asset_pattern }}
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          fail_on_unmatched_files: true

@@ -26,6 +26,10 @@ from qfluentwidgets import (
 
 from ts_client import TeamSpeakClient
 from ts_query import ServerQueryClient
+try:
+    from _version import __version__
+except ImportError:
+    __version__ = "0.0.0"
 
 # --- Translations ---
 EVENT_TRANSLATIONS = {
@@ -557,6 +561,11 @@ class SettingsInterface(QWidget):
         self.saveBtn = PrimaryPushButton("保存并重连 (Save & Reconnect)", self)
         self.vBoxLayout.addWidget(self.saveBtn)
         self.vBoxLayout.addStretch(1)
+        
+        # Version Label
+        self.versionLabel = BodyLabel(f"Version: {__version__}", self)
+        self.versionLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.vBoxLayout.addWidget(self.versionLabel)
 
 # --- Server Admin Interface ---
 class ServerAdminInterface(QWidget):

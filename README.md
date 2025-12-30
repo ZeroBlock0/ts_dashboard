@@ -64,3 +64,27 @@ The application bundle will be generated at `dist_nuitka/TS Dashboard.app`.
 uv sync
 uv run main.py
 ```
+
+### Release Process
+
+To release a new version:
+
+1.  Update the version number in `_version.py`.
+2.  Run the release script:
+
+    **Windows:**
+    ```powershell
+    .\release.bat
+    ```
+
+    **macOS / Linux:**
+    ```bash
+    ./release.sh
+    ```
+
+This script will:
+- Sync the version to `pyproject.toml`.
+- Commit all changes.
+- Push to the `main` branch.
+- Create and push a git tag (e.g., `v1.0.0`), which triggers the CI/CD workflow.
+

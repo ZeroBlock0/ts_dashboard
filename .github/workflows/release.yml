@@ -5,18 +5,17 @@ on:
     branches:
       - main           # 合并到 main 时触发自动打 Tag 和发布
     tags:
-      - 'v*'           # 手动推送 v 开头的标签时也触发
+      - 'v*'           # 手动推送标签时触发
   pull_request:
     branches:
-      - main           # 提交 PR 时触发构建和 Copilot 审查
-  workflow_dispatch:   # 允许手动触发
+      - main           # PR 时触发构建检查
+  workflow_dispatch:
 
 jobs:
   build:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
-    # 核心权限配置：必须有 write 才能推送 Tag 和发布 Release
     permissions:
       contents: write
       pull-requests: write 
@@ -32,7 +31,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # 必须设为 0，否则无法获取历史标签来计算新版本号
+          fetch-depth: 0 # 获取完整历史以计算版本号
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -44,44 +43,54 @@ jobs:
         with:
           python-version: '3.12'
 
+      # --- 新增：自动计算并同步版本号 ---
+      - name: Sync and Generate Version
+        id: version_logic
+        shell: pwsh
+        run: |
+          # 获取当前最新标签
+          $latestTag = git describe --tags --abbrev=0 2>$null
+          if ($null -eq $latestTag) { $latestTag = "v1.0.0" }
+          
+          # 如果是 PR 阶段，不增加版本号，仅读取当前版本
+          # 如果是 Push 到 main，则计算下一个版本
+          $newTag = $latestTag
+          if ("${{ github.event_name }}" -eq "push" -and "${{ github.ref }}" -eq "refs/heads/main") {
+              $version = $latestTag.TrimStart('v')
+              $parts = $version.Split('.')
+              $parts[2] = [int]$parts[2] + 1
+              $newTag = "v" + ($parts -join '.')
+          }
+          
+          # 同步到 _version.py 供 Nuitka 读取 [cite: 4, 5]
+          $cleanVer = $newTag.TrimStart('v')
+          "__version__ = '$cleanVer'" | Out-File -Encoding ascii _version.py
+          
+          echo "tag=$newTag" >> $env:GITHUB_OUTPUT
+          echo "Using Version: $newTag"
+
       - name: Run Build Script
         run: ${{ matrix.script }}
         env:
           NUITKA_CACHE_DISABLE: "1"
 
-      # 第一部分：自动计算版本号并打 Tag (仅在合并到 main 且没有标签时运行)
-      - name: Create Automatic Tag
+      # --- 只有合并到 main 时才打新 Tag ---
+      - name: Push New Tag
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        id: auto_tag
         shell: pwsh
         run: |
-          # 1. 获取最新标签，如果没有则默认为 v1.0.0
-          $latestTag = git describe --tags --abbrev=0 2>$null
-          if ($null -eq $latestTag) { $latestTag = "v1.0.0" }
-          
-          # 2. 版本号自动累加 (例如 v1.0.5 -> v1.0.6)
-          $version = $latestTag.TrimStart('v')
-          $parts = $version.Split('.')
-          $parts[2] = [int]$parts[2] + 1
-          $newTag = "v" + ($parts -join '.')
-          
-          # 3. 推送新标签
+          $tag = "${{ steps.version_logic.outputs.tag }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag $newTag
-          git push origin $newTag
-          
-          # 4. 传递给下一步
-          echo "tag=$newTag" >> $env:GITHUB_OUTPUT
+          git tag $tag
+          git push origin $tag
 
-      # 第二部分：发布 Release (仅在有标签时运行)
+      # --- 发布 Release ---
       - name: Upload to Release
-        # 如果是手动推的 tag，或者上一步刚自动生成的 tag，则执行发布
-        if: startsWith(github.ref, 'refs/tags/') || steps.auto_tag.outputs.tag != ''
+        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'push' && github.ref == 'refs/heads/main')
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ matrix.asset_pattern }}
-          # 优先使用自动生成的 tag，否则使用当前触发的 ref_name
-          tag_name: ${{ steps.auto_tag.outputs.tag || github.ref_name }}
+          tag_name: ${{ steps.version_logic.outputs.tag }}
           generate_release_notes: true
           fail_on_unmatched_files: true

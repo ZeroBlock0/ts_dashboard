@@ -82,7 +82,7 @@ uv run main.py
 2. 在 `app/ui/interfaces/server_admin_interface.py` 中添加 UI 按钮或输入框。
 3. 在 `app/ui/main_window.py` 的 `run_query` 方法中处理新的命令类型，并调用 `ts_query.py` 中的方法。
 
-## 4. 构建发布 (Build)
+## 4. 构建 (Build)
 
 使用 Nuitka 将 Python 代码编译为原生可执行文件。
 
@@ -96,17 +96,3 @@ build_nuitka.bat
 chmod +x build_nuitka.sh
 ./build_nuitka.sh
 ```
-
-## 5. 辅助脚本说明
-
-为了简化 Git 操作，项目根目录提供了以下工具脚本：
-
-- **`提交到dev分支`**: 
-  - **用途**: 在 `dev` 分支开发完成后使用。
-  - **动作**: 自动执行 `git add`, `git commit` 并推送至 `origin dev`。
-- **`从main分支同步`**: 
-  - **用途**: 在 GitHub 上的 PR 合并到 `main` 后运行。
-  - **动作**: 切换到 `main`，拉取云端自动生成的版本号文件 (`_version.py`) 和最新的 Git Tag。
-- **`build_nuitka`**: 
-  - **用途**: 本地环境打包测试。
-  - **注意**: 正式发布的打包由 GitHub Action 执行，无需手动上传。

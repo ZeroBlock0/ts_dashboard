@@ -4,14 +4,19 @@ cd /d %~dp0
 
 echo Checking environment...
 
-REM Check for uv
+REM 从 _version.py 提取版本号 
+for /f "tokens=2 delims='" %%I in ('findstr "__version__" _version.py') do set VERSION=%%I
+if "%VERSION%"=="" set VERSION=1.0.0.0
+echo Version detected: %VERSION%
+
+REM 检查 uv
 uv --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo Error: 'uv' is not installed.
     exit /b 1
 )
 
-REM Ensure dependencies
+REM 确保依赖
 if not exist ".venv" (
     echo Virtual environment not found. Running 'uv sync'...
     uv sync
@@ -19,20 +24,12 @@ if not exist ".venv" (
 
 set "PYTHON_EXE=.venv\Scripts\python.exe"
 
-REM Check Nuitka
-"%PYTHON_EXE%" -c "import nuitka" 2>nul
-if %errorlevel% neq 0 (
-    echo Nuitka not found. Running 'uv sync'...
-    uv sync
-    if %errorlevel% neq 0 exit /b 1
-)
-
 echo Starting Nuitka Build...
 
 if exist build_nuitka rmdir /s /q build_nuitka
 if exist dist_nuitka rmdir /s /q dist_nuitka
 
-REM Run Nuitka Build
+REM 运行 Nuitka 打包，使用变量设置版本信息 [cite: 2]
 "%PYTHON_EXE%" -m nuitka ^
     --assume-yes-for-downloads ^
     --onefile ^
@@ -45,14 +42,14 @@ REM Run Nuitka Build
     --output-dir=dist_nuitka ^
     --company-name="TS Dashboard" ^
     --product-name="TS Dashboard" ^
-    --file-version=1.0.0.0 ^
-    --product-version=1.0.0.0 ^
+    --file-version=%VERSION% ^
+    --product-version=%VERSION% ^
     --output-filename=TS_Dashboard.exe ^
     --remove-output ^
     main.py
 
 if %errorlevel% equ 0 (
-    echo Build Success!
+    echo Build Success! [cite: 3]
     echo Output: dist_nuitka\TS_Dashboard.exe
 ) else (
     echo Build Failed!

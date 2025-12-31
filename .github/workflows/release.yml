@@ -3,7 +3,10 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*' # 推送标签时触发工作流
+      - 'v*'  # 推送标签时触发工作流
+  pull_request:        # 添加这一行：PR 产生时触发
+    branches:
+      - main           # 只有目标是 main 的 PR 才触发构建
   workflow_dispatch:
 
 jobs:

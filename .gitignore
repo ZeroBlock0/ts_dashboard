@@ -14,3 +14,4 @@ release.sh
 release.bat
 build_nuitka.sh
 build_nuitka.bat
+run.bat

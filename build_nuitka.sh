@@ -4,6 +4,16 @@ cd "$(dirname "$0")"
 
 echo "Checking environment..."
 
+# --- 新增：从 _version.py 提取版本号 ---
+# 使用 sed 提取引号内的内容
+VERSION=$(sed -n "s/__version__ = ['\"]\(.*\)['\"]/\1/p" _version.py)
+
+# 如果没找到版本号，设置默认值
+if [ -z "$VERSION" ]; then
+    VERSION="1.0.0.0"
+fi
+echo "Version detected: $VERSION"
+
 # 检查 uv
 if ! command -v uv &> /dev/null; then
     echo "Error: 'uv' is not installed."
@@ -26,7 +36,7 @@ echo "System Info:"
 sysctl hw.memsize hw.ncpu || true
 df -h . || true
 
-# 运行 Nuitka 打包（添加更多优化参数和输出）
+# 运行 Nuitka 打包
 $PYTHON_EXE -m nuitka \
     --standalone \
     --macos-create-app-bundle \
@@ -39,8 +49,8 @@ $PYTHON_EXE -m nuitka \
     --output-dir=dist_nuitka \
     --company-name="TS Dashboard" \
     --product-name="TS Dashboard" \
-    --file-version=1.0.0.0 \
-    --product-version=1.0.0.0 \
+    --file-version=$VERSION \
+    --product-version=$VERSION \
     --remove-output \
     --show-progress \
     --show-memory \
@@ -52,20 +62,18 @@ if [ $? -eq 0 ]; then
     echo "Nuitka Build Success! Starting DMG creation..."
     
     APP_NAME="TS Dashboard"
-    DMG_NAME="TS_Dashboard_macOS.dmg"
+    # 将版本号加入 DMG 文件名，方便区分
+    DMG_NAME="TS_Dashboard_macOS_v$VERSION.dmg"
     
     cd dist_nuitka
 
-    # Rename the generated app to the desired product name
     if [ -d "main.app" ]; then
         mv "main.app" "$APP_NAME.app"
     fi
     
-    # 修复权限
     echo "Fixing permissions..."
     chmod +x "$APP_NAME.app/Contents/MacOS/main"
     
-    # 创建 DMG
     echo "Creating DMG..."
     hdiutil create -volname "$APP_NAME" -srcfolder "$APP_NAME.app" -ov -format UDZO "$DMG_NAME"
     

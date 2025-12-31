@@ -40,7 +40,7 @@ REM 运行 Nuitka 打包，使用变量设置版本信息 [cite: 2]
     --include-package-data=qfluentwidgets ^
     --include-package=websockets ^
     --output-dir=dist_nuitka ^
-    --company-name="TS Dashboard" ^
+    --company-name="114514" ^
     --product-name="TS Dashboard" ^
     --file-version=%VERSION% ^
     --product-version=%VERSION% ^

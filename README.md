@@ -42,27 +42,18 @@
 
 ## 开发与构建
 
-本项目已采用模块化架构，使用 `uv` 管理依赖，使用 `Nuitka` 打包为原生可执行文件。
+本项目已采用全自动化流水线。开发者只需关注 `dev` 分支的开发，版本发布由 GitHub Actions 自动完成。
 
-详细的开发指南请参阅 [开发文档 (docs/DEVELOPMENT.md)](docs/DEVELOPMENT.md)。
+### 自动化发布流程
+1. **本地开发**：在 `dev` 分支编写代码，使用 `提交到dev分支` 推送。
+2. **提交审核**：在 GitHub 提交 Pull Request 到 `main` 分支。
+3. **自动构建**：云端会自动运行 Nuitka 构建并由 Copilot 进行审查。
+4. **合并发布**：PR 合并后，云端会自动累加版本号、打标签并发布 Release。
+5. **本地同步**：合并完成后，运行 `从main分支同步` 保持本地版本最新。
 
 ### 快速开始
-
 ```bash
 # 安装依赖
 uv sync
-
 # 运行程序
 uv run main.py
-```
-
-### 构建
-
-```bash
-# Windows
-build_nuitka.bat
-
-# macOS / Linux
-./build_nuitka.sh
-```
-

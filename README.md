@@ -43,49 +43,10 @@
 - Windows：安装 Visual Studio 的 C++ 构建工具。
 - macOS：安装 Xcode 命令行工具。
 
-### 构建说明
-
-仓库包含一键构建脚本用于环境准备与编译。
-
-**Windows：**
-```powershell
-.\build_nuitka.bat
-```
-可执行文件位于 `dist_nuitka\TS_Dashboard.exe`。
-
-**macOS：**
-```bash
-chmod +x build_nuitka.sh
-./build_nuitka.sh
-```
-应用程序包位于 `dist_nuitka/TS Dashboard.app`。
-
 ### 从源码运行
 
 ```bash
 uv sync
 uv run main.py
 ```
-
-### 发布流程
-
-发布步骤：
-
-1. 在 `_version.py` 中更新版本号。
-2. 运行发布脚本：
-
-   **Windows：**
-   ```powershell
-   .\release.bat
-   ```
-
-   **macOS / Linux：**
-   ```bash
-   ./release.sh
-   ```
-
-发布脚本会：
-- 将版本号同步到 `pyproject.toml`。
-- 提交并推送更改到 `main` 分支。
-- 创建并推送 Git 标签（例如 `v1.0.0`），触发 CI/CD 工作流。
 

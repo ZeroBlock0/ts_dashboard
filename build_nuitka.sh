@@ -47,7 +47,7 @@ $PYTHON_EXE -m nuitka \
     --include-package-data=qfluentwidgets \
     --include-package=websockets \
     --output-dir=dist_nuitka \
-    --company-name="TS Dashboard" \
+    --company-name="114514" \
     --product-name="TS Dashboard" \
     --file-version=$VERSION \
     --product-version=$VERSION \

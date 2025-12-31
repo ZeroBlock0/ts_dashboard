@@ -13,3 +13,7 @@ wheels/
 release.sh
 release.bat
 run.bat
+
+# Exclude backup files and folders
+bak/
+*.bak

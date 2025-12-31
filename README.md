@@ -4,12 +4,19 @@
 
 ## 功能
 
-- **仪表盘 (Dashboard)**：实时监控 TeamSpeak 事件（如用户移动、文字消息等）。
-- **聊天监控 (Chat Monitor)**：查看并记录服务器聊天信息。
+- **仪表盘 (Dashboard)**：
+  - 实时监控 TeamSpeak 事件（如用户移动、文字消息等）。
+  - 支持**自动清空**日志，防止内存占用过高。
+- **聊天监控 (Chat Monitor)**：
+  - 查看并记录服务器聊天信息。
+  - 支持**自动清空**历史消息。
 - **服务器管理 (Server Admin)**：
   - 查看服务器信息、频道列表、用户列表与封禁列表。
   - 执行管理操作：踢出用户 (Kick)、戳一戳 (Poke)、全局广播。
   - 发送自定义 ServerQuery 命令。
+- **系统日志 (System Logs)**：
+  - 记录程序运行状态与错误信息。
+  - 支持导出日志与**自动清空**。
 - **设置 (Settings)**：
   - 配置 Remote Apps（WebSocket）与 ServerQuery（Telnet）连接信息。
   - **自动连接**：启动时是否自动连接。
@@ -35,18 +42,27 @@
 
 ## 开发与构建
 
-本项目使用 `uv` 管理依赖，使用 `Nuitka` 打包为原生可执行文件。
+本项目已采用模块化架构，使用 `uv` 管理依赖，使用 `Nuitka` 打包为原生可执行文件。
 
-### 前置条件
+详细的开发指南请参阅 [开发文档 (docs/DEVELOPMENT.md)](docs/DEVELOPMENT.md)。
 
-- 已安装 `uv`（参见：<https://github.com/astral-sh/uv>）。
-- Windows：安装 Visual Studio 的 C++ 构建工具。
-- macOS：安装 Xcode 命令行工具。
-
-### 从源码运行
+### 快速开始
 
 ```bash
+# 安装依赖
 uv sync
+
+# 运行程序
 uv run main.py
+```
+
+### 构建
+
+```bash
+# Windows
+build_nuitka.bat
+
+# macOS / Linux
+./build_nuitka.sh
 ```
 

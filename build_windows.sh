@@ -43,7 +43,7 @@ fi
 PYTHON_EXE=".venv/Scripts/python.exe"
 
 echo "Starting Nuitka Build for Windows..."
-rm -rf build_nuitka dist_nuitka
+rm -rf build dist
 
 "$PYTHON_EXE" -m nuitka \
     --assume-yes-for-downloads \
@@ -55,7 +55,7 @@ rm -rf build_nuitka dist_nuitka
     --include-data-file=app2.ico=app2.ico \
     --include-package-data=qfluentwidgets \
     --include-package=websockets \
-    --output-dir=dist_nuitka \
+    --output-dir=dist \
     --company-name="114514" \
     --product-name="TS Dashboard" \
     --file-version=$VERSION \
@@ -66,7 +66,7 @@ rm -rf build_nuitka dist_nuitka
 
 if [ $? -eq 0 ]; then
     echo "Build Success!"
-    echo "Output: dist_nuitka/TS_Dashboard.exe"
+    echo "Output: dist/TS_Dashboard.exe"
 else
     echo "Build Failed!"
     exit 1

@@ -76,13 +76,13 @@ jobs:
           - os: windows-latest
             script: ./build_windows.sh
             artifact_name: TS_Dashboard.exe
-            asset_path: dist_nuitka/TS_Dashboard.exe
+            asset_path: dist/TS_Dashboard.exe
             content_type: application/vnd.microsoft.portable-executable
           
           # - os: macos-latest
           #   script: ./build_macos.sh
           #   artifact_name: TS_Dashboard_macOS.zip
-          #   asset_path: dist_nuitka/TS_Dashboard_macOS.zip
+          #   asset_path: dist/TS_Dashboard_macOS.zip
           #   content_type: application/zip
 
     steps:
@@ -109,8 +109,8 @@ jobs:
       - name: Package macOS App
         if: matrix.os == 'macos-latest'
         run: |
-          cd dist_nuitka
-          # build_nuitka.sh creates TS_Dashboard.app
+          cd dist
+          # build_macos.sh creates TS_Dashboard.app
           zip -r TS_Dashboard_macOS.zip "TS Dashboard.app"
 
       - name: Upload to Release

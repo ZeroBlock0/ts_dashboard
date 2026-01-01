@@ -11,6 +11,7 @@ from qfluentwidgets import (
 )
 
 from app.common.constants import EVENT_TRANSLATIONS, KEY_TRANSLATIONS
+from app.common.i18n import tr
 
 class DashboardInterface(QWidget):
     def __init__(self, parent=None):
@@ -20,26 +21,26 @@ class DashboardInterface(QWidget):
         self.vBoxLayout = QVBoxLayout(self)
         
         # Title
-        self.titleLabel = SubtitleLabel("实时事件流 (TeamSpeak Events)", self)
+        self.titleLabel = SubtitleLabel(tr("event_log"), self)
         self.vBoxLayout.addWidget(self.titleLabel)
         
         # Search Bar
         self.searchBar = SearchLineEdit(self)
-        self.searchBar.setPlaceholderText("搜索事件内容...")
+        self.searchBar.setPlaceholderText(tr("search") + "...")
         self.searchBar.textChanged.connect(self.filter_tree)
         self.vBoxLayout.addWidget(self.searchBar)
         
         # Controls
         self.controlLayout = QHBoxLayout()
-        self.autoScrollCb = QCheckBox("自动滚动 (Auto Scroll)", self)
+        self.autoScrollCb = QCheckBox(tr("auto_scroll"), self)
         self.autoScrollCb.setChecked(True)
         
         # Auto Clear Controls
-        self.autoClearCb = QCheckBox("自动清空 (Auto Clear)", self)
+        self.autoClearCb = QCheckBox(tr("auto_clear"), self)
         self.autoClearCb.setChecked(False)
         self.autoClearCb.stateChanged.connect(self.toggle_auto_clear)
         
-        self.autoClearLabel = BodyLabel("间隔(秒):", self)
+        self.autoClearLabel = BodyLabel(tr("interval_sec") + ":", self)
         self.autoClearInput = LineEdit(self)
         self.autoClearInput.setText("60")
         self.autoClearInput.setFixedWidth(60)

@@ -44,7 +44,7 @@ fi
 PYTHON_EXE=".venv/bin/python"
 
 echo "Starting Nuitka Build for macOS..."
-rm -rf build_nuitka dist_nuitka
+rm -rf build dist
 
 # 显示系统资源信息
 echo "System Info:"
@@ -62,7 +62,7 @@ $PYTHON_EXE -m nuitka \
     --include-data-file=app.icns=app.icns \
     --include-package-data=qfluentwidgets \
     --include-package=websockets \
-    --output-dir=dist_nuitka \
+    --output-dir=dist \
     --company-name="114514" \
     --product-name="TS Dashboard" \
     --file-version=$VERSION \
@@ -81,7 +81,7 @@ if [ $? -eq 0 ]; then
     # 将版本号加入 DMG 文件名，方便区分
     DMG_NAME="TS_Dashboard_macOS_v$VERSION.dmg"
     
-    cd dist_nuitka
+    cd dist
 
     if [ -d "main.app" ]; then
         mv "main.app" "$APP_NAME.app"

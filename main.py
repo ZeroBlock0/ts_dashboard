@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt
 from qfluentwidgets import Theme, setTheme
 
 from app.common.config import load_config
+from app.common.i18n import init_language
 from app.ui.main_window import MainWindow
 
 if __name__ == "__main__":
@@ -13,6 +14,9 @@ if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
 
     app = QApplication(sys.argv)
+    
+    # Initialize Language
+    init_language()
     
     # Load initial theme from config
     init_theme = Theme.LIGHT

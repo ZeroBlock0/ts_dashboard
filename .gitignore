@@ -5,7 +5,6 @@ build/
 dist/
 wheels/
 *.egg-info
-dist_nuitka/
 
 # Virtual environments
 .venv

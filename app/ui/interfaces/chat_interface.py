@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
 from qfluentwidgets import (
     SubtitleLabel, PushButton, FluentIcon as FIF, SearchLineEdit, BodyLabel, LineEdit
 )
+from app.common.i18n import tr
 
 class ChatInterface(QWidget):
     def __init__(self, parent=None):
@@ -14,34 +15,34 @@ class ChatInterface(QWidget):
         
         self.vBoxLayout = QVBoxLayout(self)
         
-        self.titleLabel = SubtitleLabel("聊天监控 (Chat Monitor)", self)
+        self.titleLabel = SubtitleLabel(tr("chat_log"), self)
         self.vBoxLayout.addWidget(self.titleLabel)
         
         self.messages = [] # Store messages
         
         # Search Bar
         self.searchBar = SearchLineEdit(self)
-        self.searchBar.setPlaceholderText("搜索聊天记录...")
+        self.searchBar.setPlaceholderText(tr("search") + "...")
         self.searchBar.textChanged.connect(self.filter_chat)
         self.vBoxLayout.addWidget(self.searchBar)
         
         # Controls
         self.controlLayout = QHBoxLayout()
-        self.autoScrollCb = QCheckBox("自动滚动 (Auto Scroll)", self)
+        self.autoScrollCb = QCheckBox(tr("auto_scroll"), self)
         self.autoScrollCb.setChecked(True)
         
         # Auto Clear Controls
-        self.autoClearCb = QCheckBox("自动清空 (Auto Clear)", self)
+        self.autoClearCb = QCheckBox(tr("auto_clear"), self)
         self.autoClearCb.setChecked(False)
         self.autoClearCb.stateChanged.connect(self.toggle_auto_clear)
         
-        self.autoClearLabel = BodyLabel("间隔(秒):", self)
+        self.autoClearLabel = BodyLabel(tr("interval_sec") + ":", self)
         self.autoClearInput = LineEdit(self)
         self.autoClearInput.setText("60")
         self.autoClearInput.setFixedWidth(60)
         self.autoClearInput.textChanged.connect(self.update_auto_clear_interval)
         
-        self.clearBtn = PushButton("清空 (Clear)", self)
+        self.clearBtn = PushButton(tr("clear"), self)
         self.clearBtn.setIcon(FIF.DELETE)
         
         self.controlLayout.addWidget(self.autoScrollCb)

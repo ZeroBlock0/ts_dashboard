@@ -7,6 +7,7 @@ from qfluentwidgets import (
     SubtitleLabel, PushButton, FluentIcon as FIF, InfoBar, SearchLineEdit,
     BodyLabel, LineEdit, isDarkTheme
 )
+from app.common.i18n import tr
 
 class LogInterface(QWidget):
     def __init__(self, parent=None):
@@ -14,36 +15,36 @@ class LogInterface(QWidget):
         self.setObjectName("logInterface")
         self.vBoxLayout = QVBoxLayout(self)
         
-        self.titleLabel = SubtitleLabel("系统日志 (System Logs)", self)
+        self.titleLabel = SubtitleLabel(tr("logs"), self)
         self.vBoxLayout.addWidget(self.titleLabel)
         
         self.logs = [] # Store logs for filtering
         
         # Search Bar
         self.searchBar = SearchLineEdit(self)
-        self.searchBar.setPlaceholderText("搜索日志内容...")
+        self.searchBar.setPlaceholderText(tr("search") + "...")
         self.searchBar.textChanged.connect(self.filter_logs)
         self.vBoxLayout.addWidget(self.searchBar)
         
         # Controls
         self.controlLayout = QHBoxLayout()
-        self.autoScrollCb = QCheckBox("自动滚动 (Auto Scroll)", self)
+        self.autoScrollCb = QCheckBox(tr("auto_scroll"), self)
         self.autoScrollCb.setChecked(True)
         
         # Auto Clear Controls
-        self.autoClearCb = QCheckBox("自动清空 (Auto Clear)", self)
+        self.autoClearCb = QCheckBox(tr("auto_clear"), self)
         self.autoClearCb.setChecked(False)
         self.autoClearCb.stateChanged.connect(self.toggle_auto_clear)
         
-        self.autoClearLabel = BodyLabel("间隔(秒):", self)
+        self.autoClearLabel = BodyLabel(tr("interval_sec") + ":", self)
         self.autoClearInput = LineEdit(self)
         self.autoClearInput.setText("60")
         self.autoClearInput.setFixedWidth(60)
         self.autoClearInput.textChanged.connect(self.update_auto_clear_interval)
         
-        self.exportBtn = PushButton("导出日志 (Export)", self)
+        self.exportBtn = PushButton(tr("save"), self)
         self.exportBtn.setIcon(FIF.SAVE)
-        self.clearBtn = PushButton("清空 (Clear)", self)
+        self.clearBtn = PushButton(tr("clear"), self)
         self.clearBtn.setIcon(FIF.DELETE)
         
         self.controlLayout.addWidget(self.autoScrollCb)

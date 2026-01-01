@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.1.4 (2026-01-01)
+
+### Bug Fixes
+
+- Verify uv.lock auto-stage in release process
+  ([`584f399`](https://github.com/ZeroBlock0/ts_dashboard/commit/584f39960c6cbb8e73da6bf1971f6c728b3f17c5))
+
+### Chores
+
+- Ensure uv.lock is staged during semantic release build
+  ([`bc6c64c`](https://github.com/ZeroBlock0/ts_dashboard/commit/bc6c64cbde62558be448cfacd141108a5dfe6841))
+
+
 ## v1.1.3 (2026-01-01)
 
 ### Bug Fixes

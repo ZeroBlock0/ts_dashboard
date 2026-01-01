@@ -81,6 +81,7 @@ TRANSLATIONS = {
         "target_clid": "目标用户ID (clid)",
         "poke_message": "戳一戳消息",
         "token_list": "特权密钥",
+        "send_custom_json": "发送自定义 JSON 指令",
     },
     "en_US": {
         "app_name": "TS Dashboard",
@@ -159,6 +160,7 @@ TRANSLATIONS = {
         "target_clid": "Target Client ID (clid)",
         "poke_message": "Poke Message",
         "token_list": "Privilege Keys",
+        "send_custom_json": "Send Custom JSON Command",
     }
 }
 

@@ -1,89 +1,82 @@
 # TS Dashboard (TS 仪表盘)
 
-一个为 TeamSpeak 5 设计的综合桌面仪表盘，提供事件监控、聊天日志和服务器管理功能。
+一个为 TeamSpeak 5 设计的现代化综合桌面仪表盘，提供实时事件监控、聊天日志记录和强大的服务器管理功能。
 
-## 功能
+![License](https://img.shields.io/github/license/ZeroBlock0/ts_dashboard)
+![Version](https://img.shields.io/github/v/release/ZeroBlock0/ts_dashboard)
+![Build Status](https://img.shields.io/github/actions/workflow/status/ZeroBlock0/ts_dashboard/release.yml)
 
-- **仪表盘 (Dashboard)**：
-  - 实时监控 TeamSpeak 事件（如用户移动、文字消息等）。
-  - 支持**自动清空**日志，防止内存占用过高。
-- **聊天监控 (Chat Monitor)**：
-  - 查看并记录服务器聊天信息。
-  - 支持**自动清空**历史消息。
-- **服务器管理 (Server Admin)**：
-  - 查看服务器信息、频道列表、用户列表与封禁列表。
-  - 执行管理操作：踢出用户 (Kick)、戳一戳 (Poke, 支持自定义消息)、全局广播。
-  - 发送自定义 ServerQuery 命令 (支持 Telnet 协议)。
-- **系统日志 (System Logs)**：
-  - 记录程序运行状态与错误信息。
-  - 支持导出日志与**自动清空**。
-- **设置 (Settings)**：
-  - 配置 Remote Apps（WebSocket）与 ServerQuery（Telnet）连接信息。
-  - **自动连接**：启动时是否自动连接。
-  - **手动控制**：带状态指示的连接 / 断开按钮。
-  - **API Key**：管理 TeamSpeak Remote Apps 的 API Key。
+## ✨ 核心功能
 
-> **注意**：配置保存在 `ts_config.json`，如果遇到程序无法启动的情况，删除该文件可重置设置。
+### 📊 仪表盘 (Dashboard)
+- **实时监控**：捕获并展示 TeamSpeak 客户端的所有事件（如用户进出、文字消息、权限变动等）。
+- **智能管理**：支持自动清空日志，防止长时间运行导致内存占用过高。
+- **自定义指令**：支持发送自定义 JSON 指令到 Remote Apps。
 
-### 配置与安全
-- 设置页可选择是否**保存 API Key** 与 **保存 ServerQuery 密码**，默认不强制保存密码，方便避免明文落盘。
-- 支持一键清除已保存的凭据。
-- 端口输入会自动校验，非法值会回退为默认端口并提示。
+### 💬 聊天监控 (Chat Monitor)
+- **全频道记录**：实时查看并记录服务器内的公共聊天、频道聊天和私聊信息。
+- **历史回溯**：支持自动滚动和自动清理历史消息。
 
-### 日志
-- 日志级别可在设置中切换（DEBUG/INFO/WARNING/ERROR）。
-- 可选文件日志，默认写入 `ts_dashboard.log`（滚动保存，最大约 1MB，最多 3 个文件）。
+### 🛠️ 服务器管理 (Server Admin)
+- **信息概览**：查看服务器基本信息、在线人数、频道列表。
+- **用户管理**：查看在线用户列表，执行 **踢出 (Kick)**、**封禁 (Ban)** 操作。
+- **趣味互动**：支持 **戳一戳 (Poke)** 功能，并可发送自定义戳一戳消息。
+- **高级控制**：内置 ServerQuery 终端，支持发送任意 Telnet 管理命令（如 `whoami`, `serverinfo`）。
 
-### 国际化 (i18n)
-- 支持 **简体中文 (Simplified Chinese)** 和 **英文 (English)** 切换。
-- 可在“设置” -> “外观”中更改语言（需重启生效）。
+### ⚙️ 系统与设置
+- **多语言支持**：内置 **简体中文** 和 **English**，一键切换。
+- **主题适配**：支持浅色/深色主题切换，或跟随系统自动调整。
+- **连接管理**：支持 Remote Apps (WebSocket) 和 ServerQuery (Telnet) 双重连接。
+- **安全隐私**：敏感信息（如 API Key、密码）可选择是否保存，支持一键清除。
 
-### 版本
-- 版本号由 `semantic-release` 自动管理，无需手动修改。
-- 遵循 **Conventional Commits** 规范提交代码，CI 会自动计算版本号、生成 Changelog 并发布 Release。
+## 🚀 安装与使用
 
-### 图标与打包
-- Windows：Exe 使用 `app.ico`；窗口与任务栏图标使用 `app2.ico`（脚本已将两者内置）。
-- macOS：应用包与窗口均使用 `app.icns`。
+### 1. 准备工作
+在使用本软件前，请确保您的 TeamSpeak 客户端已启用 Remote Apps 功能：
+1. 打开 TeamSpeak 客户端设置。
+2. 进入 **Remote Apps** 选项卡。
+3. 勾选 **Enable Remote Apps**（默认端口 5899）。
 
-## 安装与使用
+### 2. 运行程序
+- **Windows**: 下载并运行 `TS_Dashboard.exe`。
+- **macOS**: 下载并打开 `TS Dashboard.app`。
 
-1. **启用 TeamSpeak Remote Apps**：
-   - 打开 TeamSpeak 设置 → Remote Apps。
-   - 确保 WebSocket 服务已启用（默认端口 5899）。
+> 首次连接时，TeamSpeak 客户端会弹出授权提示框，请点击 **Allow** (允许)。
 
-2. **运行程序**：
-   - Windows：运行 `TS_Dashboard.exe`。
-   - macOS：打开 `TS Dashboard.app`。
-   - 首次运行时，TeamSpeak 会提示授权，请点击 “Allow”。
+### 3. 连接 ServerQuery (可选)
+如果您需要使用服务器管理功能（如踢人、封禁）：
+1. 在 TS Dashboard 中进入 **设置** 页面。
+2. 填写 ServerQuery 的 IP、端口（默认 10011）、用户名（通常是 `serveradmin`）和密码。
+3. 点击 **连接** 或 **保存并重连**。
 
-3. **ServerQuery（可选）**：
-   - 前往 “设置” 页，输入 ServerQuery 的 IP、端口、用户名与密码。
-   - 点击 “保存并重连” 或使用单独的连接按钮进行连接。
+## 🛠️ 开发与构建
 
-## 开发与构建
+本项目基于 Python 3.12 + PySide6 (Qt) + Nuitka 开发。
 
-在 `dev` 分支开发，PR通过后的版本发布由 GitHub Actions 自动完成。
+### 环境要求
+- Python 3.12+
+- `uv` (推荐) 或 `pip`
 
 ### 快速开始
-```bash
-# 方式一：直接使用 uv
-uv sync
-uv run main.py
 
-# 方式二：使用脚本 (自动同步依赖并运行)
+```bash
+# 1. 克隆仓库
+git clone https://github.com/ZeroBlock0/ts_dashboard.git
+cd ts_dashboard
+
+# 2. 安装依赖
+uv sync
+
+# 3. 运行
+# Windows
+./run.bat
+
+# macOS / Linux
 ./run.sh
 ```
 
-### 提交规范 (Conventional Commits)
-本项目使用 `semantic-release` 自动发布版本，请务必遵守以下提交格式：
-- `fix: ...` -> 修复 Bug (Patch 版本 +1)
-- `feat: ...` -> 新功能 (Minor 版本 +1)
-- `feat!: ...` -> 破坏性变更 (Major 版本 +1)
-- `docs:`, `style:`, `refactor:`, `chore:` -> 不触发版本发布
-
 ### 手动构建
-构建产物位于 `dist/` 目录。
+构建产物将输出到 `dist/` 目录。
 
 ```bash
 # Windows
@@ -92,4 +85,19 @@ uv run main.py
 # macOS
 ./build_macos.sh
 ```
+
+## 🤝 贡献指南
+
+欢迎提交 Issue 和 Pull Request！
+
+本项目使用 **Semantic Release** 自动管理版本，请务必遵守 [Conventional Commits](https://www.conventionalcommits.org/) 规范提交代码：
+
+- `feat: ...` -> 新功能 (Minor 版本 +1)
+- `fix: ...` -> 修复 Bug (Patch 版本 +1)
+- `docs: ...` -> 文档变更
+- `style: ...` -> 代码格式调整
+
+## 📄 许可证
+
+本项目采用 MIT 许可证。详情请参阅 [LICENSE](LICENSE) 文件。
 

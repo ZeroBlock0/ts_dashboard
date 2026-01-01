@@ -16,3 +16,6 @@ release.bat
 # Exclude backup files and folders
 bak/
 *.bak
+
+# configuration files
+ts_config.json

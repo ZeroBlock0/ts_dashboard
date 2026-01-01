@@ -1,4 +1,5 @@
 import os
+import webbrowser
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QCheckBox
@@ -25,6 +26,9 @@ class SettingsInterface(QWidget):
         self.autoConnectCb = QCheckBox(tr("auto_connect"), self)
         self.autoConnectCb.setChecked(self.config.get("auto_connect", True))
         self.vBoxLayout.addWidget(self.autoConnectCb)
+        
+        # --- Row 1: Appearance & Logging ---
+        self.row1Layout = QHBoxLayout()
         
         # Appearance Settings
         self.groupAppearance = QGroupBox(tr("appearance"), self)
@@ -53,8 +57,7 @@ class SettingsInterface(QWidget):
             self.comboTheme.setCurrentIndex(0)
             
         self.layoutAppearance.addRow(f"{tr('theme')}:", self.comboTheme)
-        self.vBoxLayout.addWidget(self.groupAppearance)
-
+        
         # Logging Settings
         self.groupLogging = QGroupBox(tr("logs"), self)
         self.layoutLogging = QFormLayout(self.groupLogging)
@@ -67,7 +70,14 @@ class SettingsInterface(QWidget):
         self.saveLogToFileCb.setChecked(self.config.get("file_logging", True))
         self.layoutLogging.addRow(f"{tr('log_level')}:", self.comboLogLevel)
         self.layoutLogging.addRow(f"{tr('save')}:", self.saveLogToFileCb)
-        self.vBoxLayout.addWidget(self.groupLogging)
+        
+        # Add to Row 1
+        self.row1Layout.addWidget(self.groupAppearance)
+        self.row1Layout.addWidget(self.groupLogging)
+        self.vBoxLayout.addLayout(self.row1Layout)
+        
+        # --- Row 2: Remote Apps & ServerQuery ---
+        self.row2Layout = QHBoxLayout()
         
         # Remote Apps Settings
         self.groupRemote = QGroupBox(tr("remote_apps"), self)
@@ -104,7 +114,6 @@ class SettingsInterface(QWidget):
         self.layoutRemote.addRow(f"{tr('api_key')}:", self.apiKeyRemote)
         self.layoutRemote.addRow(f"{tr('save')}:", self.saveApiKeyCb)
         self.layoutRemote.addRow(" ", self.clearApiKeyBtn)
-        self.vBoxLayout.addWidget(self.groupRemote)
         
         # ServerQuery Settings
         self.groupQuery = QGroupBox(tr("server_query"), self)
@@ -142,14 +151,19 @@ class SettingsInterface(QWidget):
         self.layoutQuery.addRow(f"{tr('password')}:", self.passQuery)
         self.layoutQuery.addRow(f"{tr('save')}:", self.saveQueryPassCb)
         self.layoutQuery.addRow(" ", self.clearQueryPassBtn)
-        self.vBoxLayout.addWidget(self.groupQuery)
+        
+        # Add to Row 2
+        self.row2Layout.addWidget(self.groupRemote)
+        self.row2Layout.addWidget(self.groupQuery)
+        self.vBoxLayout.addLayout(self.row2Layout)
         
         # About
         self.groupAbout = QGroupBox(tr("about"), self)
         self.layoutAbout = QFormLayout(self.groupAbout)
         self.versionLabel = BodyLabel(f"{tr('version')}: {__version__}", self)
         self.repoBtn = PushButton(tr("repo"), self)
-        self.repoBtn.clicked.connect(lambda: os.startfile("https://github.com/ZeroBlock0/ts_dashboard"))
+        self.repoBtn.setFixedWidth(200)
+        self.repoBtn.clicked.connect(lambda: webbrowser.open("https://github.com/ZeroBlock0/ts_dashboard"))
         self.layoutAbout.addRow(self.versionLabel)
         self.layoutAbout.addRow(self.repoBtn)
         self.vBoxLayout.addWidget(self.groupAbout)
@@ -158,6 +172,11 @@ class SettingsInterface(QWidget):
 
         # Connect signals
         self.comboLang.currentIndexChanged.connect(self._on_language_changed)
+
+        # Save Button
+        self.saveBtn = PrimaryPushButton(tr("save"), self)
+        self.saveBtn.setFixedWidth(260)
+        self.vBoxLayout.addWidget(self.saveBtn, 0, Qt.AlignmentFlag.AlignCenter)
 
     def _on_language_changed(self, index):
         lang_code = "en_US" if index == 1 else "zh_CN"
@@ -173,16 +192,3 @@ class SettingsInterface(QWidget):
                 duration=5000,
                 parent=self
             )
-
-
-        
-        # Save Button
-        self.saveBtn = PrimaryPushButton("保存并重连 (Save & Reconnect)", self)
-        self.saveBtn.setFixedWidth(260)
-        self.vBoxLayout.addWidget(self.saveBtn)
-        self.vBoxLayout.addStretch(1)
-        
-        # Version Label
-        self.versionLabel = BodyLabel(f"Version: {__version__}", self)
-        self.versionLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.vBoxLayout.addWidget(self.versionLabel)

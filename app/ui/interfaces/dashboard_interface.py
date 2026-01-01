@@ -72,7 +72,7 @@ class DashboardInterface(QWidget):
         self.copyShortcut.activated.connect(self.copy_selection)
         
         # Input Area Title
-        self.inputLabel = SubtitleLabel("发送自定义 JSON 指令", self)
+        self.inputLabel = SubtitleLabel(tr("send_custom_json"), self)
         self.vBoxLayout.addWidget(self.inputLabel)
         
         # JSON Input
@@ -84,9 +84,9 @@ class DashboardInterface(QWidget):
         
         # Buttons
         self.buttonLayout = QHBoxLayout()
-        self.sendBtn = PrimaryPushButton("发送指令 (Send)", self)
+        self.sendBtn = PrimaryPushButton(tr("send"), self)
         self.sendBtn.setIcon(FIF.SEND)
-        self.clearBtn = PushButton("清空日志 (Clear)", self)
+        self.clearBtn = PushButton(tr("clear"), self)
         self.clearBtn.setIcon(FIF.DELETE)
         
         self.buttonLayout.addWidget(self.sendBtn)

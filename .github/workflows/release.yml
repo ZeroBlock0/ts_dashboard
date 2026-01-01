@@ -69,9 +69,11 @@ jobs:
           echo "version=$try_version" >> $GITHUB_OUTPUT
           echo "tag=v$try_version" >> $GITHUB_OUTPUT
           
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Configure git user for the commit
+          git config user.name "ZeroBlock0"
+          git config user.email "ZeroBlock0@users.noreply.github.com"
           
+          # Run semantic-release
           semantic-release version
           semantic-release publish
 

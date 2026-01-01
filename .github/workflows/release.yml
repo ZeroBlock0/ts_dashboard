@@ -42,7 +42,7 @@ jobs:
       - name: Semantic Release
         id: semantic
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN_PAT }}
         run: |
           # Debug: Print current version and next version calculation
           echo "Debugging Semantic Release..."

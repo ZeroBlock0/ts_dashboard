@@ -16,6 +16,7 @@ from qfluentwidgets import (
 from app.common.config import load_config, get_config_path, save_config as write_config
 from app.common.signals import WorkerSignals
 from app.common.logger import QtLogHandler
+from app.common.i18n import tr
 from app.core.ts_client import TeamSpeakClient
 from app.core.ts_query import ServerQueryClient
 
@@ -28,7 +29,7 @@ from app.ui.interfaces.log_interface import LogInterface
 class MainWindow(FluentWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("TS 仪表盘 (Dashboard)")
+        self.setWindowTitle(tr("app_name"))
         
         # Set Window Icon
         # 任务栏/应用级图标 (Win 用 app2.ico)
@@ -93,11 +94,11 @@ class MainWindow(FluentWindow):
         logging.info(f"Executable: {sys.executable}")
         
         # Add Navigation Items
-        self.addSubInterface(self.dashboardInterface, FIF.HOME, "仪表盘")
-        self.addSubInterface(self.chatInterface, FIF.CHAT, "聊天监控")
-        self.addSubInterface(self.serverAdminInterface, FIF.PEOPLE, "服务器管理")
-        self.addSubInterface(self.logInterface, FIF.DOCUMENT, "系统日志")
-        self.addSubInterface(self.settingsInterface, FIF.SETTING, "设置")
+        self.addSubInterface(self.dashboardInterface, FIF.HOME, tr("dashboard"))
+        self.addSubInterface(self.chatInterface, FIF.CHAT, tr("chat"))
+        self.addSubInterface(self.serverAdminInterface, FIF.PEOPLE, tr("server_admin"))
+        self.addSubInterface(self.logInterface, FIF.DOCUMENT, tr("logs"))
+        self.addSubInterface(self.settingsInterface, FIF.SETTING, tr("settings"))
         
         # Connect Dashboard Send Button
         self.dashboardInterface.sendBtn.clicked.connect(self.send_command)
@@ -590,8 +591,12 @@ class MainWindow(FluentWindow):
                     return
             elif cmd_type == "poke":
                 clid = self.serverAdminInterface.inputClid.text()
+                msg = self.serverAdminInterface.inputPokeMsg.text()
                 if clid:
-                    data = await self.query_client.poke_client(clid)
+                    if msg:
+                        data = await self.query_client.poke_client(clid, msg=msg)
+                    else:
+                        data = await self.query_client.poke_client(clid)
                 else:
                     self.signals.query_response.emit({"error": "Client ID 不能为空"})
                     return

@@ -6,6 +6,7 @@ from qfluentwidgets import (
     SubtitleLabel, PushButton, SearchLineEdit, BodyLabel, LineEdit, ComboBox,
     PasswordLineEdit, PrimaryPushButton
 )
+from app.common.i18n import tr
 
 class ServerAdminInterface(QWidget):
     def __init__(self, parent=None):
@@ -13,23 +14,23 @@ class ServerAdminInterface(QWidget):
         self.setObjectName("serverAdminInterface")
         self.vBoxLayout = QVBoxLayout(self)
         
-        self.titleLabel = SubtitleLabel("服务器管理 (Server Admin)", self)
+        self.titleLabel = SubtitleLabel(tr("server_admin"), self)
         self.vBoxLayout.addWidget(self.titleLabel)
         
         # Search Bar
         self.searchBar = SearchLineEdit(self)
-        self.searchBar.setPlaceholderText("搜索结果...")
+        self.searchBar.setPlaceholderText(tr("search") + "...")
         self.searchBar.textChanged.connect(self.filter_tree)
         self.vBoxLayout.addWidget(self.searchBar)
         
         # Group 1: Information & Lists
-        self.groupInfo = QGroupBox("信息查询 (Information)", self)
+        self.groupInfo = QGroupBox(tr("info"), self)
         self.layoutInfo = QHBoxLayout(self.groupInfo)
-        self.btnInfo = PushButton("服务器信息", self)
-        self.btnChannels = PushButton("频道列表", self)
-        self.btnClients = PushButton("用户列表", self)
-        self.btnBans = PushButton("封禁列表", self)
-        self.btnTokens = PushButton("特权密钥", self)
+        self.btnInfo = PushButton(tr("server_info"), self)
+        self.btnChannels = PushButton(tr("channel_list"), self)
+        self.btnClients = PushButton(tr("client_list"), self)
+        self.btnBans = PushButton(tr("ban_list"), self)
+        self.btnTokens = PushButton(tr("token_list"), self)
         
         self.layoutInfo.addWidget(self.btnInfo)
         self.layoutInfo.addWidget(self.btnChannels)
@@ -40,25 +41,25 @@ class ServerAdminInterface(QWidget):
         self.vBoxLayout.addWidget(self.groupInfo)
 
         # Group 2: Management Actions
-        self.groupAction = QGroupBox("管理操作 (Actions)", self)
+        self.groupAction = QGroupBox(tr("actions"), self)
         self.layoutAction = QVBoxLayout(self.groupAction)
         
         # Row 1: Message Center
         self.rowMsg = QHBoxLayout()
         self.comboMsgType = ComboBox(self)
-        self.comboMsgType.addItems(["全局广播 (GM)", "服务器聊天 (Server)", "频道聊天 (Channel)", "私聊 (Private)"])
+        self.comboMsgType.addItems([tr("broadcast"), tr("server_chat"), tr("channel_chat"), tr("private_chat")])
         self.comboMsgType.setFixedWidth(160)
         self.comboMsgType.currentIndexChanged.connect(self.on_msg_type_changed)
         
         self.inputMsgTarget = LineEdit(self)
-        self.inputMsgTarget.setPlaceholderText("目标ID (clid)")
+        self.inputMsgTarget.setPlaceholderText(tr("target_id"))
         self.inputMsgTarget.setFixedWidth(100)
         self.inputMsgTarget.setEnabled(False) # Default disabled
         
         self.inputMsg = LineEdit(self)
-        self.inputMsg.setPlaceholderText("输入消息内容...")
+        self.inputMsg.setPlaceholderText(tr("message_content"))
         
-        self.btnSendMsg = PrimaryPushButton("发送消息 (Send)", self)
+        self.btnSendMsg = PrimaryPushButton(tr("send"), self)
         
         self.rowMsg.addWidget(self.comboMsgType)
         self.rowMsg.addWidget(self.inputMsgTarget)
@@ -69,17 +70,17 @@ class ServerAdminInterface(QWidget):
         # Row 2: Query Bot Move & Rename
         self.rowBotMove = QHBoxLayout()
         self.inputBotCid = LineEdit(self)
-        self.inputBotCid.setPlaceholderText("目标频道ID (cid)")
+        self.inputBotCid.setPlaceholderText(tr("target_cid"))
         self.inputBotCid.setFixedWidth(120)
         self.inputBotPwd = PasswordLineEdit(self)
-        self.inputBotPwd.setPlaceholderText("频道密码 (可选)")
+        self.inputBotPwd.setPlaceholderText(tr("channel_password"))
         self.inputBotPwd.setFixedWidth(120)
-        self.btnBotMove = PushButton("切换频道", self)
+        self.btnBotMove = PushButton(tr("switch_channel"), self)
         
         self.inputBotName = LineEdit(self)
-        self.inputBotName.setPlaceholderText("修改 Bot 昵称")
+        self.inputBotName.setPlaceholderText(tr("bot_nickname"))
         self.inputBotName.setFixedWidth(120)
-        self.btnBotRename = PushButton("改名", self)
+        self.btnBotRename = PushButton(tr("rename"), self)
         
         self.rowBotMove.addWidget(self.inputBotCid)
         self.rowBotMove.addWidget(self.inputBotPwd)
@@ -92,12 +93,18 @@ class ServerAdminInterface(QWidget):
         # Row 3: Client Operations
         self.rowClient = QHBoxLayout()
         self.inputClid = LineEdit(self)
-        self.inputClid.setPlaceholderText("目标用户ID (clid)")
+        self.inputClid.setPlaceholderText(tr("target_clid"))
         self.inputClid.setFixedWidth(150)
-        self.btnKick = PushButton("踢出用户 (Kick)", self)
-        self.btnPoke = PushButton("戳用户 (Poke)", self)
+        self.btnKick = PushButton(tr("kick"), self)
+        
+        self.inputPokeMsg = LineEdit(self)
+        self.inputPokeMsg.setPlaceholderText(tr("poke_message"))
+        self.inputPokeMsg.setFixedWidth(150)
+        self.btnPoke = PushButton(tr("poke"), self)
+        
         self.rowClient.addWidget(self.inputClid)
         self.rowClient.addWidget(self.btnKick)
+        self.rowClient.addWidget(self.inputPokeMsg)
         self.rowClient.addWidget(self.btnPoke)
         self.rowClient.addStretch(1)
         self.layoutAction.addLayout(self.rowClient)

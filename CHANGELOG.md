@@ -2,6 +2,27 @@
 
 <!-- version list -->
 
+## v1.1.2 (2026-01-01)
+
+### Bug Fixes
+
+- Verify uv.lock auto-update in release process
+  ([`ba2eff8`](https://github.com/ZeroBlock0/ts_dashboard/commit/ba2eff837e7b76c8e0b4122bd84f03d6c4c1f458))
+
+### Chores
+
+- Sync uv.lock and configure semantic-release to auto-update it
+  ([`c42e015`](https://github.com/ZeroBlock0/ts_dashboard/commit/c42e015fe8d5ed2312cd8838449dff7d99e8f7a5))
+
+- Update uv.lock version to 1.1.0
+  ([`08bfc24`](https://github.com/ZeroBlock0/ts_dashboard/commit/08bfc24cff910af260ed5c26e073a2ff5a3a7be1))
+
+### Documentation
+
+- Add semantic release guide
+  ([`7dde3a1`](https://github.com/ZeroBlock0/ts_dashboard/commit/7dde3a182d1f98fd82a8abfe9b4335d8dedf5ce9))
+
+
 ## v1.1.1 (2026-01-01)
 
 ### Bug Fixes

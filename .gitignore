@@ -13,7 +13,6 @@ dist_nuitka/
 # Maintainer scripts
 release.sh
 release.bat
-run.bat
 
 # Exclude backup files and folders
 bak/

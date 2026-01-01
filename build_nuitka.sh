@@ -4,9 +4,15 @@ cd "$(dirname "$0")"
 
 echo "Checking environment..."
 
-# --- 新增：从 _version.py 提取版本号 ---
-# 使用 sed 提取引号内的内容
-VERSION=$(sed -n "s/__version__ = ['\"]\(.*\)['\"]/\1/p" _version.py)
+# --- 从 _version.py 提取版本号（兼容空格/单双引号） ---
+VERSION=$(python - <<'PY'
+import re
+from pathlib import Path
+text = Path('_version.py').read_text(encoding='utf-8', errors='ignore')
+m = re.search(r"__version__\s*=\s*['\"]([^'\"]+)['\"]", text)
+print(m.group(1) if m else '')
+PY
+)
 
 # 如果没找到版本号，设置默认值
 if [ -z "$VERSION" ]; then

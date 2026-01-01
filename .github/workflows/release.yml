@@ -46,7 +46,6 @@ jobs:
         run: |
           # Debug: Print current version and next version calculation
           echo "Debugging Semantic Release..."
-          semantic-release version --print --verbosity=DEBUG || true
           
           # Check version
           if ! try_version=$(semantic-release version --print); then

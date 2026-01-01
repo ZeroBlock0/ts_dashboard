@@ -12,6 +12,7 @@ ts_dashboard/
 │   ├── common/             # 通用工具模块
 │   │   ├── config.py       # 配置文件的加载与保存 (ts_config.json)
 │   │   ├── constants.py    # 常量定义 (如事件类型翻译字典)
+│   │   ├── i18n.py         # 国际化支持 (Translation)
 │   │   ├── logger.py       # 日志处理 (QtLogHandler)
 │   │   └── signals.py      # 全局 Qt 信号定义 (WorkerSignals)
 │   ├── core/               # 核心业务逻辑
@@ -81,23 +82,69 @@ uv run main.py
   - 文件日志由 `file_logging` 控制，路径 `ts_dashboard.log`，采用滚动（1MB x 3）。
   - UI 内日志通过 `QtLogHandler` 转发到 Log 页面。
 
-### 3.3. 版本与发布
-- **自动化版本管理**：本项目使用 `semantic-release`。
-- **版本号位置**：
-  - `app/__init__.py`: 包含 `__version__` 变量，由 CI 自动更新。
-  - `pyproject.toml`: `[project] version` 字段，由 CI 自动更新。
-- **提交规范**：必须遵循 **Conventional Commits**。
-  - `fix: ...` -> Patch (1.0.0 -> 1.0.1)
-  - `feat: ...` -> Minor (1.0.0 -> 1.1.0)
-  - `feat!: ...` -> Major (1.0.0 -> 2.0.0)
-- **发布流程**：
-  1. 推送代码到 `main` 分支。
-  2. GitHub Action (`release.yml`) 触发。
-  3. `semantic-release` 分析提交记录，计算新版本。
-  4. 自动更新文件、打 Tag、生成 Changelog 并发布 GitHub Release。
-  5. 自动触发 Nuitka 构建，并将产物上传到 Release。
+### 3.3. 国际化 (i18n)
+本项目支持多语言切换（目前支持简体中文 `zh_CN` 和英文 `en_US`）。
+- **实现方式**：使用 `app.common.i18n` 模块。
+- **添加新语言**：
+  1. 在 `app/common/i18n.py` 的 `TRANSLATIONS` 字典中添加新的语言代码（如 `ja_JP`）。
+  2. 在 `app/ui/interfaces/settings_interface.py` 的语言下拉框中添加新选项。
+- **使用翻译**：
+  在 UI 代码中，使用 `tr("key")` 替代硬编码的字符串。
+  ```python
+  from app.common.i18n import tr
+  label = BodyLabel(tr("dashboard"), self)
+  ```
+- **注意事项**：目前语言切换需要重启应用才能生效。
 
-### 3.3. 添加新功能页面
+### 3.4. 版本与发布 (Semantic Release)
+
+本项目采用全自动化的版本管理和发布流程，基于 [python-semantic-release](https://python-semantic-release.readthedocs.io/)。
+
+#### 3.3.1. 工作原理
+开发者无需手动修改版本号。CI 系统会根据 **Commit Messages** 自动判断版本升级类型（Major/Minor/Patch），并执行以下操作：
+1.  计算下一个版本号。
+2.  更新 `app/__init__.py` 和 `pyproject.toml` 中的版本号。
+3.  生成 `CHANGELOG.md`。
+4.  创建 Git Tag。
+5.  创建 GitHub Release。
+6.  触发构建流程，将生成的 `.exe` / `.app` 上传到 Release 附件。
+
+#### 3.3.2. 提交规范 (Conventional Commits)
+为了让系统正确识别，**必须**使用符合 [Conventional Commits](https://www.conventionalcommits.org/) 规范的提交信息：
+
+格式：`<type>(<scope>): <description>`
+
+| 类型 (Type) | 含义 | 版本影响 | 示例 |
+| :--- | :--- | :--- | :--- |
+| **fix** | 修复 Bug | **Patch** (1.0.0 -> 1.0.1) | `fix: 修复了聊天窗口无法滚动的bug` |
+| **feat** | 新功能 | **Minor** (1.0.0 -> 1.1.0) | `feat: 新增服务器状态监控面板` |
+| **feat!** | 破坏性变更 | **Major** (1.0.0 -> 2.0.0) | `feat!: 重构API接口，不再兼容旧版` |
+| **docs** | 文档修改 | 无 | `docs: 更新README安装说明` |
+| **style** | 格式调整 | 无 | `style: 调整代码缩进` |
+| **refactor**| 代码重构 | 无 | `refactor: 优化数据库连接逻辑` |
+| **chore** | 杂务 | 无 | `chore: 更新依赖库` |
+| **ci** | CI配置 | 无 | `ci: 修复GitHub Actions脚本` |
+
+> **注意**：如果提交信息不符合规范（如简单的 "update code"），该提交将被忽略，不会触发版本发布。
+
+#### 3.3.3. 发布流程
+1.  在本地完成开发。
+2.  使用规范的 Commit Message 提交代码。
+3.  推送到 `main` 分支：`git push origin main`。
+4.  前往 GitHub Actions 页面查看 `Build and Release` 工作流进度。
+
+### 3.4. 构建 (Build)
+构建产物将输出到 `dist/` 目录。
+
+```bash
+# Windows 构建 (生成 dist/TS_Dashboard.exe)
+./build_windows.sh
+
+# macOS 构建 (生成 dist/TS_Dashboard.app 和 .dmg)
+./build_macos.sh
+```
+
+### 3.5. 添加新功能页面
 1. 在 `app/ui/interfaces/` 下创建一个新的 `.py` 文件 (例如 `my_interface.py`)。
 2. 定义一个继承自 `QWidget` 的类。
 3. 在 `app/ui/main_window.py` 中导入该类。

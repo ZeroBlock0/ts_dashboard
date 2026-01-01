@@ -12,7 +12,7 @@
   - 支持**自动清空**历史消息。
 - **服务器管理 (Server Admin)**：
   - 查看服务器信息、频道列表、用户列表与封禁列表。
-  - 执行管理操作：踢出用户 (Kick)、戳一戳 (Poke)、全局广播。
+  - 执行管理操作：踢出用户 (Kick)、戳一戳 (Poke, 支持自定义消息)、全局广播。
   - 发送自定义 ServerQuery 命令。
 - **系统日志 (System Logs)**：
   - 记录程序运行状态与错误信息。
@@ -33,6 +33,10 @@
 ### 日志
 - 日志级别可在设置中切换（DEBUG/INFO/WARNING/ERROR）。
 - 可选文件日志，默认写入 `ts_dashboard.log`（滚动保存，最大约 1MB，最多 3 个文件）。
+
+### 国际化 (i18n)
+- 支持 **简体中文 (Simplified Chinese)** 和 **英文 (English)** 切换。
+- 可在“设置” -> “外观”中更改语言（需重启生效）。
 
 ### 版本
 - 版本号由 `semantic-release` 自动管理，无需手动修改。
@@ -79,6 +83,8 @@ uv run main.py
 - `docs:`, `style:`, `refactor:`, `chore:` -> 不触发版本发布
 
 ### 手动构建
+构建产物位于 `dist/` 目录。
+
 ```bash
 # Windows
 ./build_windows.sh

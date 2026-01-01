@@ -2837,7 +2837,7 @@ wheels = [
 
 [[package]]
 name = "ts-dashboard"
-version = "1.0.0.0"
+version = "1.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "nuitka" },

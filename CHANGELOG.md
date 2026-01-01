@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.3 (2026-01-01)
+
+### Bug Fixes
+
+- Checkout release tag in build job to ensure correct version in app
+  ([`a3c0b98`](https://github.com/ZeroBlock0/ts_dashboard/commit/a3c0b9809e432604a12ec71db6644b6ee6aa4d14))
+
+
 ## v1.1.2 (2026-01-01)
 
 ### Bug Fixes

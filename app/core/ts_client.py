@@ -3,6 +3,7 @@ import json
 import os
 import websockets
 import logging
+from app import __version__
 
 # Configure logging to file
 # logging.basicConfig(
@@ -110,7 +111,7 @@ class TeamSpeakClient:
             "type": "auth",
             "payload": {
                 "identifier": "com.ts_dashboard.app",
-                "version": "1.0.0",
+                "version": __version__,
                 "name": "TS Dashboard",
                 "description": "Dashboard for TeamSpeak",
                 "content": {

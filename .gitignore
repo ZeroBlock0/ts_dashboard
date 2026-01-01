@@ -19,3 +19,6 @@ bak/
 
 # configuration files
 ts_config.json
+
+# log
+ts_dashboard.log

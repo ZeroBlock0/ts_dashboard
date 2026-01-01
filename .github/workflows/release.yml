@@ -44,10 +44,17 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Check version
-          try_version=$(semantic-release version --print || echo "")
+          # Run semantic-release to get the next version. If it fails, print error and exit.
+          if ! try_version=$(semantic-release version --print); then
+            echo "Error: semantic-release failed to determine the next version."
+            # Run again without capturing output to show the error log
+            semantic-release version --print || true
+            echo "released=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
           
           if [ -z "$try_version" ]; then
-            echo "No release needed."
+            echo "No release needed (no version change detected)."
             echo "released=false" >> $GITHUB_OUTPUT
             exit 0
           fi

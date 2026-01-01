@@ -100,6 +100,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.released == 'true' && needs.release.outputs.tag || '' }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5

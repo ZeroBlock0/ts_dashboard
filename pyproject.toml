@@ -16,7 +16,7 @@ dependencies = [
 version_variables = ["app/__init__.py:__version__", "pyproject.toml:version"]
 upload_to_pypi = false
 upload_to_release = true
-build_command = ""
+build_command = "uv lock"
 
 [tool.semantic_release.branches.main]
 match = "main" 

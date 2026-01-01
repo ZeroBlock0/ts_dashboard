@@ -35,7 +35,8 @@
 - 可选文件日志，默认写入 `ts_dashboard.log`（滚动保存，最大约 1MB，最多 3 个文件）。
 
 ### 版本
-- 版本号由 `_version.py` 手动维护，CI 直接使用该版本打包并生成 `v<版本号>` tag，不会自动递增。
+- 版本号由 `semantic-release` 自动管理，无需手动修改。
+- 遵循 **Conventional Commits** 规范提交代码，CI 会自动计算版本号、生成 Changelog 并发布 Release。
 
 ### 图标与打包
 - Windows：Exe 使用 `app.ico`；窗口与任务栏图标使用 `app2.ico`（脚本已将两者内置）。
@@ -62,8 +63,27 @@
 
 ### 快速开始
 ```bash
-# 安装依赖
+# 方式一：直接使用 uv
 uv sync
-# 运行程序
 uv run main.py
+
+# 方式二：使用脚本 (自动同步依赖并运行)
+./run.sh
+```
+
+### 提交规范 (Conventional Commits)
+本项目使用 `semantic-release` 自动发布版本，请务必遵守以下提交格式：
+- `fix: ...` -> 修复 Bug (Patch 版本 +1)
+- `feat: ...` -> 新功能 (Minor 版本 +1)
+- `feat!: ...` -> 破坏性变更 (Major 版本 +1)
+- `docs:`, `style:`, `refactor:`, `chore:` -> 不触发版本发布
+
+### 手动构建
+```bash
+# Windows
+./build_windows.sh
+
+# macOS
+./build_macos.sh
+```
 

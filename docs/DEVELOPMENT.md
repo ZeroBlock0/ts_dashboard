@@ -28,8 +28,9 @@ ts_dashboard/
 ├── docs/                   # 文档
 ├── main.py                 # 程序入口点
 ├── pyproject.toml          # 项目依赖配置 (uv)
-├── build_nuitka.bat        # Windows 构建脚本
-└── build_nuitka.sh         # macOS/Linux 构建脚本
+├── run.sh                  # 运行脚本 (自动同步依赖)
+├── build_windows.sh        # Windows 构建脚本 (Bash)
+└── build_macos.sh          # macOS 构建脚本 (Bash)
 ```
 
 ## 2. 核心组件说明
@@ -81,10 +82,20 @@ uv run main.py
   - UI 内日志通过 `QtLogHandler` 转发到 Log 页面。
 
 ### 3.3. 版本与发布
-- 版本号由 `_version.py` 维护，格式 `MAJOR.MINOR.PATCH`（三段）。
-- CI 不再自动递增版本：在合并到 main 前手动更新 `_version.py`，CI 读取该版本并用 `v<version>` 打 tag。
-- 若推送到 main 时 tag 已存在，CI 将失败提醒先更新版本号。
-- Windows 文件版本会自动补齐为四段（如 1.0.4 → 1.0.4.0，为系统要求）。
+- **自动化版本管理**：本项目使用 `semantic-release`。
+- **版本号位置**：
+  - `app/__init__.py`: 包含 `__version__` 变量，由 CI 自动更新。
+  - `pyproject.toml`: `[project] version` 字段，由 CI 自动更新。
+- **提交规范**：必须遵循 **Conventional Commits**。
+  - `fix: ...` -> Patch (1.0.0 -> 1.0.1)
+  - `feat: ...` -> Minor (1.0.0 -> 1.1.0)
+  - `feat!: ...` -> Major (1.0.0 -> 2.0.0)
+- **发布流程**：
+  1. 推送代码到 `main` 分支。
+  2. GitHub Action (`release.yml`) 触发。
+  3. `semantic-release` 分析提交记录，计算新版本。
+  4. 自动更新文件、打 Tag、生成 Changelog 并发布 GitHub Release。
+  5. 自动触发 Nuitka 构建，并将产物上传到 Release。
 
 ### 3.3. 添加新功能页面
 1. 在 `app/ui/interfaces/` 下创建一个新的 `.py` 文件 (例如 `my_interface.py`)。

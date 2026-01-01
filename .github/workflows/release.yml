@@ -74,15 +74,13 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            shell: cmd
-            script: build_nuitka.bat
+            script: ./build_windows.sh
             artifact_name: TS_Dashboard.exe
             asset_path: dist_nuitka/TS_Dashboard.exe
             content_type: application/vnd.microsoft.portable-executable
           
           # - os: macos-latest
-          #   shell: bash
-          #   script: ./build_nuitka.sh
+          #   script: ./build_macos.sh
           #   artifact_name: TS_Dashboard_macOS.zip
           #   asset_path: dist_nuitka/TS_Dashboard_macOS.zip
           #   content_type: application/zip
@@ -102,7 +100,7 @@ jobs:
           python-version: '3.12'
 
       - name: Build Application
-        shell: ${{ matrix.shell }}
+        shell: bash
         run: ${{ matrix.script }}
         env:
           NUITKA_CACHE_DISABLE: "1"

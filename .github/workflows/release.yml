@@ -4,11 +4,15 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   release:
     name: Semantic Release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -73,8 +77,9 @@ jobs:
 
   build:
     name: Build on ${{ matrix.os }}
+    # Run build if release was created OR if it's a PR
     needs: release
-    if: needs.release.outputs.released == 'true'
+    if: always() && (needs.release.outputs.released == 'true' || github.event_name == 'pull_request')
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write

@@ -37,18 +37,20 @@ jobs:
       - name: Install dependencies
         run: |
           uv pip install --system python-semantic-release
+          semantic-release --version
 
       - name: Semantic Release
         id: semantic
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Debug: Print current version and next version calculation
+          echo "Debugging Semantic Release..."
+          semantic-release version --print --verbosity=DEBUG || true
+          
           # Check version
-          # Run semantic-release to get the next version. If it fails, print error and exit.
           if ! try_version=$(semantic-release version --print); then
             echo "Error: semantic-release failed to determine the next version."
-            # Run again without capturing output to show the error log
-            semantic-release version --print || true
             echo "released=false" >> $GITHUB_OUTPUT
             exit 0
           fi

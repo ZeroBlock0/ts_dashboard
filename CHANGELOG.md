@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.1 (2026-01-01)
+
+### Bug Fixes
+
+- Update hardcoded version in ts_client to use app.__version__
+  ([`b7cf70e`](https://github.com/ZeroBlock0/ts_dashboard/commit/b7cf70efff07db4bd9a530fd2a0ca03a39bd57fe))
+
+
 ## v1.1.0 (2026-01-01)
 
 ### Continuous Integration

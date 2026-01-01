@@ -43,52 +43,40 @@ jobs:
         with:
           python-version: '3.12'
 
-      # --- 新增：自动计算并同步版本号 ---
-      - name: Sync and Generate Version
+      # --- 读取版本，不再自动 +1，需在代码中维护 _version.py ---
+      - name: Read Version
         id: version_logic
         shell: pwsh
         run: |
-          # 获取当前最新标签
-          $latestTag = git describe --tags --abbrev=0 2>$null
-          if ($null -eq $latestTag) { $latestTag = "v1.0.0" }
-          
-          # 如果是 PR 阶段，不增加版本号，仅读取当前版本
-          # 如果是 Push 到 main，则计算下一个版本
-          $newTag = $latestTag
-          if ("${{ github.event_name }}" -eq "push" -and "${{ github.ref }}" -eq "refs/heads/main") {
-              $version = $latestTag.TrimStart('v')
-              $parts = $version.Split('.')
-              $parts[2] = [int]$parts[2] + 1
-              $newTag = "v" + ($parts -join '.')
+          $line = Get-Content _version.py | Where-Object { $_ -match "__version__" }
+          if (-not $line) { Write-Error "_version.py 中缺少 __version__"; exit 1 }
+          if ($line -match "['\"]([0-9]+\.[0-9]+\.[0-9]+)['\"]") {
+            $ver = $Matches[1]
+          } else {
+            Write-Error "无法解析版本号: $line"; exit 1
           }
-          
-          # 同步到 _version.py 供 Nuitka 读取 [cite: 4, 5]
-          $cleanVer = $newTag.TrimStart('v')
-          "__version__ = '$cleanVer'" | Out-File -Encoding ascii _version.py
-          
-          echo "tag=$newTag" >> $env:GITHUB_OUTPUT
-          echo "Using Version: $newTag"
+
+          # 推送 tag 的场景，优先使用 ref 中的 tag
+          if ("${{ github.ref }}" -like "refs/tags/*") {
+            $tag = "${{ github.ref }}".Replace("refs/tags/", "")
+          } else {
+            $tag = "v$ver"
+          }
+
+          # 如果是 push main，检查 tag 是否已存在
+          if ("${{ github.event_name }}" -eq "push" -and "${{ github.ref }}" -eq "refs/heads/main") {
+            $exists = git tag --list $tag
+            if ($exists) { Write-Error "Tag $tag 已存在，请先更新 _version.py"; exit 1 }
+          }
+
+          echo "tag=$tag" >> $env:GITHUB_OUTPUT
+          echo "version=$ver" >> $env:GITHUB_OUTPUT
+          echo "Using Version: $ver (tag: $tag)"
 
       - name: Run Build Script
         run: ${{ matrix.script }}
         env:
           NUITKA_CACHE_DISABLE: "1"
-
-      # 将新的版本号回写到 main 分支，避免本地与发布版本不一致
-      - name: Commit version bump back to main
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        shell: pwsh
-        run: |
-          $tag = "${{ steps.version_logic.outputs.tag }}"
-          $ver = $tag.TrimStart('v')
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git add _version.py
-          # 使用 [skip ci] 避免该提交再次触发工作流
-          git commit -m "chore: bump version to $ver [skip ci]" || echo "No changes to commit"
-          git push origin HEAD:main
 
       # --- 只有合并到 main 时才打新 Tag ---
       - name: Push New Tag

@@ -80,6 +80,12 @@ uv run main.py
   - 文件日志由 `file_logging` 控制，路径 `ts_dashboard.log`，采用滚动（1MB x 3）。
   - UI 内日志通过 `QtLogHandler` 转发到 Log 页面。
 
+### 3.3. 版本与发布
+- 版本号由 `_version.py` 维护，格式 `MAJOR.MINOR.PATCH`（三段）。
+- CI 不再自动递增版本：在合并到 main 前手动更新 `_version.py`，CI 读取该版本并用 `v<version>` 打 tag。
+- 若推送到 main 时 tag 已存在，CI 将失败提醒先更新版本号。
+- Windows 文件版本会自动补齐为四段（如 1.0.4 → 1.0.4.0，为系统要求）。
+
 ### 3.3. 添加新功能页面
 1. 在 `app/ui/interfaces/` 下创建一个新的 `.py` 文件 (例如 `my_interface.py`)。
 2. 定义一个继承自 `QWidget` 的类。

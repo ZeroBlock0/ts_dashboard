@@ -34,6 +34,9 @@
 - 日志级别可在设置中切换（DEBUG/INFO/WARNING/ERROR）。
 - 可选文件日志，默认写入 `ts_dashboard.log`（滚动保存，最大约 1MB，最多 3 个文件）。
 
+### 版本
+- 版本号由 `_version.py` 手动维护，CI 直接使用该版本打包并生成 `v<版本号>` tag，不会自动递增。
+
 ### 图标与打包
 - Windows：Exe 使用 `app.ico`；窗口与任务栏图标使用 `app2.ico`（脚本已将两者内置）。
 - macOS：应用包与窗口均使用 `app.icns`。

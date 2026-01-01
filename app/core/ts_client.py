@@ -13,12 +13,13 @@ import logging
 # )
 
 class TeamSpeakClient:
-    def __init__(self, ip="127.0.0.1", port=5899, config_file="ts_config.json"):
+    def __init__(self, ip="127.0.0.1", port=5899, config_file="ts_config.json", persist_api_key=True):
         self.ip = ip
         self.port = port
         self.uri = f"ws://{ip}:{port}"
         self.config_file = config_file
-        self.api_key = self.load_api_key()
+        self.persist_api_key = persist_api_key
+        self.api_key = self.load_api_key() if persist_api_key else ""
         self.websocket = None
         self.connected = False
         self.state = {}
@@ -38,12 +39,15 @@ class TeamSpeakClient:
                 with open(self.config_file, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                     return data.get("apiKey", "")
-            except:
+            except Exception:
                 return ""
         return ""
 
     def save_api_key(self, key):
         self.api_key = key
+        # 允许清除旧值，但在禁用持久化时不写入新值
+        if not self.persist_api_key and key:
+            return
         data = {}
         # Read existing config to preserve other settings
         if os.path.exists(self.config_file):
@@ -62,6 +66,8 @@ class TeamSpeakClient:
             logging.error(f"Error saving API key: {e}")
 
     async def connect(self):
+        if self.running:
+            return
         self.running = True
         while self.running:
             try:
@@ -83,12 +89,18 @@ class TeamSpeakClient:
                 self.connected = False
                 if self.on_disconnect_callback:
                     self.on_disconnect_callback()
+
+                if not self.running:
+                    break
                 await asyncio.sleep(5) # Retry delay
 
     async def stop(self):
         self.running = False
         if self.websocket:
-            await self.websocket.close()
+            try:
+                await self.websocket.close()
+            except Exception:
+                pass
         self.connected = False
         if self.on_disconnect_callback:
             self.on_disconnect_callback()

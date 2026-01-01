@@ -7,26 +7,34 @@ class ServerQueryClient:
         self.writer = None
         self.connected = False
 
-    async def connect(self, ip, port, username, password, server_port=9987):
-        try:
-            self.reader, self.writer = await asyncio.open_connection(ip, port)
-            
-            # Read welcome message
-            await self.read_until(b"\n\r") # TS3
-            await self.read_until(b"\n\r") # Welcome...
+    async def connect(self, ip, port, username, password, server_port=9987, timeout=10, retries=1):
+        last_error = ""
+        for attempt in range(retries):
+            try:
+                self.reader, self.writer = await asyncio.wait_for(asyncio.open_connection(ip, port), timeout=timeout)
+                
+                # Read welcome message
+                await self.read_until(b"\n\r") # TS3
+                await self.read_until(b"\n\r") # Welcome...
 
-            # Login
-            if username and password:
-                await self.send_command(f"login {username} {password}")
-            
-            # Select server
-            await self.send_command(f"use port={server_port}")
-            
-            self.connected = True
-            return True, "Connected"
-        except Exception as e:
+                # Login
+                if username and password:
+                    await self.send_command(f"login {username} {password}")
+                
+                # Select server
+                await self.send_command(f"use port={server_port}")
+                
+                self.connected = True
+                return True, "Connected"
+            except asyncio.TimeoutError:
+                last_error = "连接超时"
+            except Exception as e:
+                last_error = str(e)
+
             self.connected = False
-            return False, str(e)
+            if attempt < retries - 1:
+                await asyncio.sleep(1.0)
+        return False, last_error
 
     async def disconnect(self):
         if self.writer:

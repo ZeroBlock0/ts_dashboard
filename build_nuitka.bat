@@ -37,6 +37,7 @@ REM 运行 Nuitka 打包，使用变量设置版本信息 [cite: 2]
     --windows-console-mode=disable ^
     --windows-icon-from-ico=app.ico ^
     --include-data-file=app.ico=app.ico ^
+    --include-data-file=app2.ico=app2.ico ^
     --include-package-data=qfluentwidgets ^
     --include-package=websockets ^
     --output-dir=dist_nuitka ^

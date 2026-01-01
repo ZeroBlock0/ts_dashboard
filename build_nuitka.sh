@@ -43,6 +43,7 @@ $PYTHON_EXE -m nuitka \
     --macos-app-icon=app.icns \
     --enable-plugin=pyside6 \
     --include-data-file=app.ico=app.ico \
+    --include-data-file=app2.ico=app2.ico \
     --include-data-file=app.icns=app.icns \
     --include-package-data=qfluentwidgets \
     --include-package=websockets \

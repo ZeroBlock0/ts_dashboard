@@ -70,13 +70,23 @@ uv sync
 uv run main.py
 ```
 
-### 3.2. 添加新功能页面
+### 3.2. 配置与日志
+- 配置文件：`ts_config.json`（根目录，Nuitka 运行时同目录）。使用 `app.common.config.save_config` 原子写入，避免损坏。
+- 凭据持久化：
+  - `persist_api_key` 控制是否把 Remote Apps API Key 写入磁盘；禁用时仍会在内存中使用当前输入。
+  - `persist_query_password` 控制 ServerQuery 密码是否落盘，默认为不保存。
+- 日志：
+  - 日志级别由配置项 `log_level` 控制。
+  - 文件日志由 `file_logging` 控制，路径 `ts_dashboard.log`，采用滚动（1MB x 3）。
+  - UI 内日志通过 `QtLogHandler` 转发到 Log 页面。
+
+### 3.3. 添加新功能页面
 1. 在 `app/ui/interfaces/` 下创建一个新的 `.py` 文件 (例如 `my_interface.py`)。
 2. 定义一个继承自 `QWidget` 的类。
 3. 在 `app/ui/main_window.py` 中导入该类。
 4. 在 `MainWindow.__init__` 中实例化，并使用 `self.addSubInterface` 添加到侧边栏。
 
-### 3.3. 修改 ServerQuery 命令
+### 3.4. 修改 ServerQuery 命令
 如果需要添加新的 ServerQuery 功能：
 1. 在 `app/core/ts_query.py` 中添加相应的 `async` 方法 (发送命令并解析响应)。
 2. 在 `app/ui/interfaces/server_admin_interface.py` 中添加 UI 按钮或输入框。
@@ -91,8 +101,12 @@ uv run main.py
 build_nuitka.bat
 ```
 
+- 图标：exe 使用 `app.ico`；运行时窗口与任务栏使用 `app2.ico`（脚本已打包两者）。
+
 **macOS / Linux:**
 ```bash
 chmod +x build_nuitka.sh
 ./build_nuitka.sh
 ```
+
+- 图标：应用包与窗口均使用 `app.icns`（脚本已包含 app.ico/app2.ico 作为附带资源）。

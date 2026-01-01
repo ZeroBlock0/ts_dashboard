@@ -4,14 +4,16 @@ import json
 import asyncio
 import threading
 import logging
+from logging.handlers import RotatingFileHandler
 
 from PySide6.QtCore import Slot, QTimer
 from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QApplication
 from qfluentwidgets import (
     FluentWindow, FluentIcon as FIF, InfoBar, Theme, setTheme, InfoBarPosition
 )
 
-from app.common.config import load_config, get_config_path
+from app.common.config import load_config, get_config_path, save_config as write_config
 from app.common.signals import WorkerSignals
 from app.common.logger import QtLogHandler
 from app.core.ts_client import TeamSpeakClient
@@ -29,15 +31,25 @@ class MainWindow(FluentWindow):
         self.setWindowTitle("TS 仪表盘 (Dashboard)")
         
         # Set Window Icon
-        icon_name = "app.icns" if sys.platform == "darwin" else "app.ico"
-        icon_path = self.get_resource_path(icon_name)
-        if os.path.exists(icon_path):
-            self.setWindowIcon(QIcon(icon_path))
+        # 任务栏/应用级图标 (Win 用 app2.ico)
+        app_icon_name = "app.icns" if sys.platform == "darwin" else "app2.ico"
+        app_icon_path = self.get_resource_path(app_icon_name)
+        if os.path.exists(app_icon_path):
+            # 应用级图标用于任务栏/Dock
+            QApplication.setWindowIcon(QIcon(app_icon_path))
+
+        # 窗口图标 (Win 用 app2.ico)
+        window_icon_name = "app.icns" if sys.platform == "darwin" else "app2.ico"
+        window_icon_path = self.get_resource_path(window_icon_name)
+        if os.path.exists(window_icon_path):
+            # Windows 窗口使用 app2.ico；mac 仍用 icns
+            self.setWindowIcon(QIcon(window_icon_path))
             
         self.resize(1000, 750)
         
         # Load Config
         self.config = load_config()
+        self.log_file = os.path.join(os.path.dirname(get_config_path()), "ts_dashboard.log")
         
         # Force apply theme from config
         t = self.config.get("theme", "Light")
@@ -70,10 +82,7 @@ class MainWindow(FluentWindow):
         self.logInterface = LogInterface(self)
         
         # Setup Logging
-        self.logHandler = QtLogHandler(self.signals)
-        self.logHandler.setFormatter(logging.Formatter('%(message)s'))
-        logging.getLogger().addHandler(self.logHandler)
-        logging.getLogger().setLevel(logging.DEBUG) # Capture all logs
+        self.setup_logging()
         
         # Connect Log Signal
         self.signals.new_log.connect(self.logInterface.append_log)
@@ -97,6 +106,8 @@ class MainWindow(FluentWindow):
         self.settingsInterface.saveBtn.clicked.connect(self.update_settings)
         self.settingsInterface.btnConnectRemote.clicked.connect(self.toggle_remote_connection)
         self.settingsInterface.btnConnectQuery.clicked.connect(self.toggle_query_connection)
+        self.settingsInterface.clearApiKeyBtn.clicked.connect(self.clear_api_key)
+        self.settingsInterface.clearQueryPassBtn.clicked.connect(self.clear_query_password)
         
         # Connect Admin Buttons
         self.serverAdminInterface.btnInfo.clicked.connect(lambda: self.run_query("serverinfo"))
@@ -122,7 +133,12 @@ class MainWindow(FluentWindow):
         except ValueError:
             ra_port = 5899
             
-        self.ts_client = TeamSpeakClient(ip=ra_ip, port=ra_port, config_file=get_config_path())
+        self.ts_client = TeamSpeakClient(
+            ip=ra_ip,
+            port=ra_port,
+            config_file=get_config_path(),
+            persist_api_key=self.config.get("persist_api_key", True)
+        )
         
         self.query_client = ServerQueryClient()
         self.loop = asyncio.new_event_loop()
@@ -136,17 +152,113 @@ class MainWindow(FluentWindow):
             self.show_status(f"正在连接 Remote Apps ({ra_ip}:{ra_port})...", "warning")
 
     def get_resource_path(self, relative_path):
+        # 打包 (Nuitka onefile/standalone) 优先使用可执行文件所在目录
         if hasattr(sys, '_MEIPASS'):
             return os.path.join(sys._MEIPASS, relative_path)
+        if "__compiled__" in globals():
+            return os.path.join(os.path.dirname(sys.executable), relative_path)
         return os.path.join(os.path.abspath("."), relative_path)
 
     def save_config(self):
-        path = get_config_path()
         try:
-            with open(path, 'w', encoding='utf-8') as f:
-                json.dump(self.config, f, indent=4)
+            write_config(self.config)
         except Exception as e:
             InfoBar.error(title='保存配置失败', content=str(e), parent=self)
+
+    def setup_logging(self):
+        root_logger = logging.getLogger()
+        level_name = str(self.config.get("log_level", "INFO")).upper()
+        level = getattr(logging, level_name, logging.INFO)
+        root_logger.setLevel(level)
+
+        self.logHandler = QtLogHandler(self.signals)
+        self.logHandler.setFormatter(logging.Formatter('%(message)s'))
+        root_logger.addHandler(self.logHandler)
+
+        if self.config.get("file_logging", True):
+            try:
+                file_handler = RotatingFileHandler(self.log_file, maxBytes=1_000_000, backupCount=3, encoding='utf-8')
+                file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+                root_logger.addHandler(file_handler)
+            except Exception as e:
+                InfoBar.warning(title='日志', content=f'文件日志初始化失败: {e}', parent=self)
+
+    def update_logging_settings(self, level_name, enable_file):
+        root_logger = logging.getLogger()
+        level = getattr(logging, level_name.upper(), logging.INFO)
+        root_logger.setLevel(level)
+
+        # Remove existing rotating handlers
+        for handler in list(root_logger.handlers):
+            if isinstance(handler, RotatingFileHandler):
+                root_logger.removeHandler(handler)
+
+        if enable_file:
+            try:
+                file_handler = RotatingFileHandler(self.log_file, maxBytes=1_000_000, backupCount=3, encoding='utf-8')
+                file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+                root_logger.addHandler(file_handler)
+            except Exception as e:
+                InfoBar.warning(title='日志', content=f'文件日志启用失败: {e}', parent=self)
+
+    def shutdown(self):
+        try:
+            if self.ts_client:
+                asyncio.run_coroutine_threadsafe(self.ts_client.stop(), self.loop)
+            if self.query_client and self.query_client.connected:
+                asyncio.run_coroutine_threadsafe(self.query_client.disconnect(), self.loop)
+        finally:
+            if self.loop.is_running():
+                self.loop.call_soon_threadsafe(self.loop.stop)
+            if self.thread.is_alive():
+                self.thread.join(timeout=5)
+            if not self.loop.is_closed():
+                try:
+                    self.loop.close()
+                except Exception:
+                    pass
+
+    def closeEvent(self, event):
+        self.shutdown()
+        super().closeEvent(event)
+
+    def _validate_port(self, value, default_val, label):
+        if isinstance(value, int):
+            return value if value > 0 else default_val
+        text = str(value).strip()
+        if not text:
+            return default_val
+        try:
+            port_num = int(text)
+            if port_num <= 0:
+                raise ValueError()
+            return port_num
+        except ValueError:
+            InfoBar.warning(title='端口无效', content=f"{label} 已回退到 {default_val}", parent=self)
+            return default_val
+
+    def clear_api_key(self):
+        self.config.pop("apiKey", None)
+        self.settingsInterface.apiKeyRemote.clear()
+        self.ts_client.api_key = ""
+        # 强制清除已保存的键
+        self.ts_client.persist_api_key = True
+        self.ts_client.save_api_key("")
+        self.ts_client.persist_api_key = self.settingsInterface.saveApiKeyCb.isChecked()
+        try:
+            self.save_config()
+            InfoBar.success(title='API Key', content='已清除本地保存的 API Key', parent=self)
+        except Exception:
+            pass
+
+    def clear_query_password(self):
+        self.config.pop("query_pass", None)
+        self.settingsInterface.passQuery.clear()
+        try:
+            self.save_config()
+            InfoBar.success(title='ServerQuery', content='已清除已保存的密码', parent=self)
+        except Exception:
+            pass
 
     def start_async_loop(self):
         asyncio.set_event_loop(self.loop)
@@ -203,11 +315,7 @@ class MainWindow(FluentWindow):
         else:
             # Connect
             q_ip = self.settingsInterface.ipQuery.text()
-            try:
-                q_port = int(self.settingsInterface.portQuery.text())
-            except:
-                InfoBar.error(title='错误', content="端口必须是数字", parent=self)
-                return
+            q_port = self._validate_port(self.settingsInterface.portQuery.text(), 10011, "ServerQuery 端口")
             q_user = self.settingsInterface.userQuery.text()
             q_pass = self.settingsInterface.passQuery.text()
             
@@ -304,29 +412,62 @@ class MainWindow(FluentWindow):
             InfoBar.error(title='发送失败', content=str(e), parent=self)
 
     def update_settings(self):
-        # Get values
-        ra_ip = self.settingsInterface.ipRemote.text()
-        ra_port = self.settingsInterface.portRemote.text()
-        
+        ra_ip = self.settingsInterface.ipRemote.text().strip()
+        ra_port_raw = self.settingsInterface.portRemote.text().strip()
+        q_ip = self.settingsInterface.ipQuery.text().strip()
+        q_port_raw = self.settingsInterface.portQuery.text().strip()
+        q_user = self.settingsInterface.userQuery.text().strip()
+        q_pass = self.settingsInterface.passQuery.text()
+        api_key_val = self.settingsInterface.apiKeyRemote.text().strip()
+
+        ra_port = self._validate_port(ra_port_raw, 5899, "Remote Apps 端口")
+        q_port = self._validate_port(q_port_raw, 10011, "ServerQuery 端口")
+
         # Update Config
         self.config["auto_connect"] = self.settingsInterface.autoConnectCb.isChecked()
         self.config["remote_ip"] = ra_ip
         self.config["remote_port"] = ra_port
-        self.config["apiKey"] = self.settingsInterface.apiKeyRemote.text()
-        self.config["query_ip"] = self.settingsInterface.ipQuery.text()
-        self.config["query_port"] = self.settingsInterface.portQuery.text()
-        self.config["query_user"] = self.settingsInterface.userQuery.text()
-        self.config["query_pass"] = self.settingsInterface.passQuery.text()
-        
+        self.config["query_ip"] = q_ip
+        self.config["query_port"] = q_port
+        self.config["query_user"] = q_user
+
+        # Credential persistence
+        persist_api = self.settingsInterface.saveApiKeyCb.isChecked()
+        persist_query_pass = self.settingsInterface.saveQueryPassCb.isChecked()
+        self.config["persist_api_key"] = persist_api
+        self.config["persist_query_password"] = persist_query_pass
+
+        if persist_api:
+            self.config["apiKey"] = api_key_val
+            self.ts_client.persist_api_key = True
+            self.ts_client.save_api_key(api_key_val)
+        else:
+            self.config.pop("apiKey", None)
+            self.ts_client.persist_api_key = False
+            self.ts_client.save_api_key("")
+
+        if persist_query_pass:
+            self.config["query_pass"] = q_pass
+        else:
+            self.config.pop("query_pass", None)
+
         # Update Theme Config
         theme_idx = self.settingsInterface.comboTheme.currentIndex()
         theme_val = "Light"
         if theme_idx == 1: theme_val = "Dark"
         elif theme_idx == 2: theme_val = "System"
         self.config["theme"] = theme_val
-        
+
+        # Logging settings
+        log_level = self.settingsInterface.comboLogLevel.currentText().upper()
+        self.config["log_level"] = log_level
+        file_logging = self.settingsInterface.saveLogToFileCb.isChecked()
+        self.config["file_logging"] = file_logging
+        self.update_logging_settings(log_level, file_logging)
+
+        # Persist config
         self.save_config()
-        
+
         # Apply Theme
         if theme_val == "Dark":
             setTheme(Theme.DARK)
@@ -334,23 +475,21 @@ class MainWindow(FluentWindow):
             setTheme(Theme.AUTO)
         else:
             setTheme(Theme.LIGHT)
-        
+
         # Use defaults if empty for connection
         connect_ip = ra_ip if ra_ip else "127.0.0.1"
-        connect_port = ra_port if ra_port else "5899"
-        
-        # Update Remote Apps Client
+        connect_port = ra_port
+
+        # Update Remote Apps Client (runtime api key即使不持久化也需生效)
         self.ts_client.update_connection_info(connect_ip, connect_port)
-        self.ts_client.api_key = self.config.get("apiKey", "")
-        
-        # Trigger reconnect logic (simplified: just restart app usually, but here we can try to reconnect)
-        # For now, just notify user
-        InfoBar.info(title='设置已保存', content="配置已保存，主题已更新", parent=self)
+        self.ts_client.api_key = api_key_val
+
+        InfoBar.info(title='设置已保存', content="配置已保存，主题与日志设置已更新", parent=self)
 
     def run_query(self, command_type):
         # Get Query Settings
         q_ip = self.settingsInterface.ipQuery.text()
-        q_port = int(self.settingsInterface.portQuery.text())
+        q_port = self._validate_port(self.settingsInterface.portQuery.text(), 10011, "ServerQuery 端口")
         q_user = self.settingsInterface.userQuery.text()
         q_pass = self.settingsInterface.passQuery.text()
         

@@ -4,9 +4,11 @@ cd /d %~dp0
 
 echo Checking environment...
 
-REM 从 _version.py 提取版本号（去掉引号，避免版本信息落为空导致使用默认值）
-for /f "tokens=2 delims== " %%I in ('findstr /R /C:"__version__" _version.py') do set "VERSION_RAW=%%I"
-set "VERSION=%VERSION_RAW:"=%"
+REM 从 app/__init__.py 提取版本号（去掉引号，避免版本信息落为空导致使用默认值）
+if "%VERSION%"=="" (
+    for /f "tokens=2 delims== " %%I in ('findstr /R /C:"__version__" app\__init__.py') do set "VERSION_RAW=%%I"
+)
+if defined VERSION_RAW set "VERSION=%VERSION_RAW:"=%"
 if "%VERSION%"=="" set "VERSION=1.0.0.0"
 echo Version detected: %VERSION%
 

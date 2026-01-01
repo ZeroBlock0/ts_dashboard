@@ -4,15 +4,24 @@ cd "$(dirname "$0")"
 
 echo "Checking environment..."
 
-# --- 从 _version.py 提取版本号（兼容空格/单双引号） ---
-VERSION=$(python - <<'PY'
+# --- 优先使用环境变量 VERSION，否则从 app/__init__.py 提取 ---
+if [ -n "$VERSION" ]; then
+    echo "Using VERSION from environment: $VERSION"
+else
+    VERSION=$(python - <<'PY'
 import re
 from pathlib import Path
-text = Path('_version.py').read_text(encoding='utf-8', errors='ignore')
-m = re.search(r"__version__\s*=\s*['\"]([^'\"]+)['\"]", text)
-print(m.group(1) if m else '')
+# 尝试读取 app/__init__.py
+p = Path('app/__init__.py')
+if p.exists():
+    text = p.read_text(encoding='utf-8', errors='ignore')
+    m = re.search(r"__version__\s*=\s*['\"]([^'\"]+)['\"]", text)
+    print(m.group(1) if m else '')
+else:
+    print('')
 PY
-)
+    )
+fi
 
 # 如果没找到版本号，设置默认值
 if [ -z "$VERSION" ]; then

@@ -3,35 +3,26 @@ name: Build and Release
 on:
   push:
     branches:
-      - main           # 合并到 main 时触发自动打 Tag 和发布
-    tags:
-      - 'v*'           # 手动推送标签时触发
-  pull_request:
-    branches:
-      - main           # PR 时触发构建检查
+      - main
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 90
+  release:
+    name: Semantic Release
+    runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write 
-
-    strategy:
-      matrix:
-        include:
-          - os: windows-latest
-            script: .\build_nuitka.bat
-            asset_pattern: "dist_nuitka/TS_Dashboard.exe"
-
+      issues: write
+      pull-requests: write
+    outputs:
+      released: ${{ steps.semantic.outputs.released }}
+      version: ${{ steps.semantic.outputs.version }}
+      tag: ${{ steps.semantic.outputs.tag }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # 获取完整历史以计算版本号
+          fetch-depth: 0
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -43,59 +34,89 @@ jobs:
         with:
           python-version: '3.12'
 
-      # --- 读取版本，不再自动 +1，需在代码中维护 _version.py ---
-      - name: Read Version
-        id: version_logic
-        shell: pwsh
+      - name: Install dependencies
         run: |
-          $line = Get-Content _version.py | Where-Object { $_ -match "__version__" }
-          if (-not $line) { Write-Error "_version.py 中缺少 __version__"; exit 1 }
-          # 使用单引号包裹避免转义问题；允许 3 或 4 段版本号
-          if ($line -match '["'']([0-9]+(?:\.[0-9]+){2,3})["'']') {
-            $ver = $Matches[1]
-          } else {
-            Write-Error "无法解析版本号: $line"; exit 1
-          }
+          uv pip install --system python-semantic-release
 
-          # 推送 tag 的场景，优先使用 ref 中的 tag
-          if ("${{ github.ref }}" -like "refs/tags/*") {
-            $tag = "${{ github.ref }}".Replace("refs/tags/", "")
-          } else {
-            $tag = "v$ver"
-          }
+      - name: Semantic Release
+        id: semantic
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check version
+          try_version=$(semantic-release version --print || echo "")
+          
+          if [ -z "$try_version" ]; then
+            echo "No release needed."
+            echo "released=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Releasing version $try_version"
+          echo "released=true" >> $GITHUB_OUTPUT
+          echo "version=$try_version" >> $GITHUB_OUTPUT
+          echo "tag=v$try_version" >> $GITHUB_OUTPUT
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          semantic-release version
+          semantic-release publish
 
-          # 如果是 push main，检查 tag 是否已存在
-          if ("${{ github.event_name }}" -eq "push" -and "${{ github.ref }}" -eq "refs/heads/main") {
-            $exists = git tag --list $tag
-            if ($exists) { Write-Error "Tag $tag 已存在，请先更新 _version.py"; exit 1 }
-          }
+  build:
+    name: Build on ${{ matrix.os }}
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            shell: cmd
+            script: build_nuitka.bat
+            artifact_name: TS_Dashboard.exe
+            asset_path: dist_nuitka/TS_Dashboard.exe
+            content_type: application/vnd.microsoft.portable-executable
+          
+          # - os: macos-latest
+          #   shell: bash
+          #   script: ./build_nuitka.sh
+          #   artifact_name: TS_Dashboard_macOS.zip
+          #   asset_path: dist_nuitka/TS_Dashboard_macOS.zip
+          #   content_type: application/zip
 
-          echo "tag=$tag" >> $env:GITHUB_OUTPUT
-          echo "version=$ver" >> $env:GITHUB_OUTPUT
-          echo "Using Version: $ver (tag: $tag)"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Run Build Script
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build Application
+        shell: ${{ matrix.shell }}
         run: ${{ matrix.script }}
         env:
           NUITKA_CACHE_DISABLE: "1"
+          VERSION: ${{ needs.release.outputs.version }}
 
-      # --- 只有合并到 main 时才打新 Tag ---
-      - name: Push New Tag
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        shell: pwsh
+      - name: Package macOS App
+        if: matrix.os == 'macos-latest'
         run: |
-          $tag = "${{ steps.version_logic.outputs.tag }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag $tag
-          git push origin $tag
+          cd dist_nuitka
+          # build_nuitka.sh creates TS_Dashboard.app
+          zip -r TS_Dashboard_macOS.zip "TS Dashboard.app"
 
-      # --- 发布 Release ---
       - name: Upload to Release
-        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'push' && github.ref == 'refs/heads/main')
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ matrix.asset_pattern }}
-          tag_name: ${{ steps.version_logic.outputs.tag }}
-          generate_release_notes: true
-          fail_on_unmatched_files: true
+          files: ${{ matrix.asset_path }}
+          tag_name: ${{ needs.release.outputs.tag }}

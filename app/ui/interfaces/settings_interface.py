@@ -7,10 +7,7 @@ from qfluentwidgets import (
     PasswordLineEdit, ComboBox
 )
 
-try:
-    from _version import __version__
-except ImportError:
-    __version__ = "0.0.0"
+from app import __version__
 
 class SettingsInterface(QWidget):
     def __init__(self, config=None, parent=None):

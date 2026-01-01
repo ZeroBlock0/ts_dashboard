@@ -112,7 +112,7 @@ class ServerAdminInterface(QWidget):
         # Row 4: Custom Command
         self.rowCustom = QHBoxLayout()
         self.inputCustom = LineEdit(self)
-        self.inputCustom.setPlaceholderText("输入自定义 ServerQuery 命令 (例如: whoami)")
+        self.inputCustom.setPlaceholderText(tr("custom_command_placeholder"))
         self.btnSendCustom = PrimaryPushButton(tr("send"), self)
         self.rowCustom.addWidget(self.inputCustom)
         self.rowCustom.addWidget(self.btnSendCustom)
@@ -122,7 +122,7 @@ class ServerAdminInterface(QWidget):
         
         # Output Area
         self.outputTree = QTreeWidget(self)
-        self.outputTree.setHeaderLabels(["键 / 事件 (Key / Event)", "值 (Value)"])
+        self.outputTree.setHeaderLabels([tr("header_key_event"), tr("header_value")])
         self.outputTree.header().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         self.vBoxLayout.addWidget(self.outputTree)
 

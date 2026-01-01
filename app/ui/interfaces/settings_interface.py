@@ -1,4 +1,5 @@
 import os
+import webbrowser
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QCheckBox
@@ -162,7 +163,7 @@ class SettingsInterface(QWidget):
         self.versionLabel = BodyLabel(f"{tr('version')}: {__version__}", self)
         self.repoBtn = PushButton(tr("repo"), self)
         self.repoBtn.setFixedWidth(200)
-        self.repoBtn.clicked.connect(lambda: os.startfile("https://github.com/ZeroBlock0/ts_dashboard"))
+        self.repoBtn.clicked.connect(lambda: webbrowser.open("https://github.com/ZeroBlock0/ts_dashboard"))
         self.layoutAbout.addRow(self.versionLabel)
         self.layoutAbout.addRow(self.repoBtn)
         self.vBoxLayout.addWidget(self.groupAbout)
@@ -176,7 +177,6 @@ class SettingsInterface(QWidget):
         self.saveBtn = PrimaryPushButton(tr("save"), self)
         self.saveBtn.setFixedWidth(260)
         self.vBoxLayout.addWidget(self.saveBtn, 0, Qt.AlignmentFlag.AlignCenter)
-        self.vBoxLayout.addStretch(1)
 
     def _on_language_changed(self, index):
         lang_code = "en_US" if index == 1 else "zh_CN"

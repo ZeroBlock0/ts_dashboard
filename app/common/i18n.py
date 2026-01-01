@@ -82,6 +82,9 @@ TRANSLATIONS = {
         "poke_message": "戳一戳消息",
         "token_list": "特权密钥",
         "send_custom_json": "发送自定义 JSON 指令",
+        "custom_command_placeholder": "输入自定义 ServerQuery 命令 (例如: whoami)",
+        "header_key_event": "键 / 事件",
+        "header_value": "值",
     },
     "en_US": {
         "app_name": "TS Dashboard",
@@ -161,6 +164,9 @@ TRANSLATIONS = {
         "poke_message": "Poke Message",
         "token_list": "Privilege Keys",
         "send_custom_json": "Send Custom JSON Command",
+        "custom_command_placeholder": "Enter custom ServerQuery command (e.g., whoami)",
+        "header_key_event": "Key / Event",
+        "header_value": "Value",
     }
 }
 

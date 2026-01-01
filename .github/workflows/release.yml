@@ -126,6 +126,7 @@ jobs:
           zip -r TS_Dashboard_macOS.zip "TS Dashboard.app"
 
       - name: Upload to Release
+        if: needs.release.outputs.released == 'true'
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ matrix.asset_path }}

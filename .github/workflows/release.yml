@@ -74,6 +74,22 @@ jobs:
         env:
           NUITKA_CACHE_DISABLE: "1"
 
+      # 将新的版本号回写到 main 分支，避免本地与发布版本不一致
+      - name: Commit version bump back to main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        run: |
+          $tag = "${{ steps.version_logic.outputs.tag }}"
+          $ver = $tag.TrimStart('v')
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add _version.py
+          # 使用 [skip ci] 避免该提交再次触发工作流
+          git commit -m "chore: bump version to $ver [skip ci]" || echo "No changes to commit"
+          git push origin HEAD:main
+
       # --- 只有合并到 main 时才打新 Tag ---
       - name: Push New Tag
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
